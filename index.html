@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>КиберЩит — защити себя</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons (только для остальных иконок) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    * {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background-color: #0B1E33;
+      overflow-x: hidden;
+    }
+    /* Анимированный фон с большими пузырьками */
+    .bubbles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .bubble {
+      position: absolute;
+      background: rgba(0, 255, 148, 0.15);
+      border-radius: 50%;
+      filter: blur(40px);
+      animation: floatBubble 20s infinite ease-in-out;
+    }
+    @keyframes floatBubble {
+      0% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+      25% { transform: translate(5%, 5%) scale(1.1); opacity: 0.4; }
+      50% { transform: translate(10%, -5%) scale(0.9); opacity: 0.2; }
+      75% { transform: translate(-5%, 10%) scale(1.2); opacity: 0.4; }
+      100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+    }
+    /* Маленькие плавающие точки */
+    .floating-dots {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .dot {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(0, 255, 148, 0.3);
+      border-radius: 50%;
+      animation: float 3s infinite ease-in-out;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-30px); }
+    }
+    /* Свечение маскота */
+    .mascot-glow {
+      animation: glow 3s infinite alternate;
+    }
+    @keyframes glow {
+      from { filter: drop-shadow(0 0 5px #00FF94); }
+      to { filter: drop-shadow(0 0 20px #00FF94); }
+    }
+    /* Анимации для маскота */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    /* Подмигивание (только левый глаз) */
+    @keyframes wink {
+      0%, 80%, 100% { transform: scaleY(1); }
+      85% { transform: scaleY(0.1); }
+    }
+    /* Махание пальцем */
+    @keyframes pointWave {
+      0%, 100% { transform: rotate(0deg) translateX(0); }
+      50% { transform: rotate(3deg) translateX(2px); }
+    }
+    .mascot-container {
+      animation: float 4s ease-in-out infinite;
+    }
+    .mascot-eye-left {
+      animation: wink 6s infinite;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+    .mascot-antenna {
+      animation: antennaWave 3s ease-in-out infinite;
+      transform-origin: 60px 10px;
+    }
+    @keyframes antennaWave {
+      0%, 100% { transform: rotate(-2deg); }
+      50% { transform: rotate(2deg); }
+    }
+    /* Указывающий палец */
+    .pointing-finger {
+      animation: pointWave 2.5s infinite ease-in-out;
+      transform-origin: 90px 40px;
+    }
+    /* Анимация для фигур тем */
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(3deg); }
+      75% { transform: rotate(-3deg); }
+    }
+    .topic-figure {
+      animation: wiggle 3s infinite ease-in-out;
+    }
+    /* Стили для карточек выбора темы */
+    .topic-card {
+      background: linear-gradient(145deg, rgba(0,255,148,0.15) 0%, rgba(45,126,231,0.15) 100%);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 2.5rem;
+      transition: all 0.3s;
+      backdrop-filter: blur(8px);
+      width: 100%;
+      max-width: 340px;
+      padding: 2rem 1.5rem 1.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      box-shadow: 0 20px 30px -10px rgba(0,0,0,0.5);
+    }
+    .topic-card:hover {
+      border-color: #00FF94;
+      box-shadow: 0 0 30px rgba(0,255,148,0.4), 0 20px 30px -10px rgba(0,0,0,0.5);
+      transform: translateY(-8px);
+    }
+    .topic-card:hover .topic-figure {
+      animation: wiggle 1s infinite;
+    }
+    .topic-button {
+      background: linear-gradient(135deg, #00FF94, #2D7EE7);
+      color: #0B1E33;
+      font-weight: 700;
+      font-size: 1.5rem;
+      padding: 0.75rem 2rem;
+      border-radius: 60px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      max-width: 200px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .topic-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 25px rgba(0,255,148,0.6);
+      background: white;
+      color: #0B1E33;
+    }
+    /* Стили для скролла */
+    #app {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #00FF94 #0B1E33;
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+    #app::-webkit-scrollbar {
+      width: 6px;
+    }
+    #app::-webkit-scrollbar-track {
+      background: #0B1E33;
+    }
+    #app::-webkit-scrollbar-thumb {
+      background-color: #00FF94;
+      border-radius: 20px;
+    }
+    /* Адаптивность */
+    @media (max-width: 768px) {
+      .px-4 { padding-left: 1rem; padding-right: 1rem; }
+      .topic-card { max-width: 300px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Анимированные большие пузырьки -->
+  <div class="bubbles">
+    <div class="bubble" style="width: 300px; height: 300px; top: 10%; left: 5%; animation-duration: 18s;"></div>
+    <div class="bubble" style="width: 400px; height: 400px; bottom: 20%; right: 10%; animation-duration: 22s; background: rgba(45, 126, 231, 0.1);"></div>
+    <div class="bubble" style="width: 250px; height: 250px; top: 50%; left: 20%; animation-duration: 15s;"></div>
+    <div class="bubble" style="width: 350px; height: 350px; bottom: 10%; left: 30%; animation-duration: 25s; background: rgba(0, 255, 148, 0.1);"></div>
+    <div class="bubble" style="width: 200px; height: 200px; top: 80%; right: 25%; animation-duration: 20s;"></div>
+  </div>
+
+  <!-- Маленькие плавающие зелёные точки -->
+  <div class="floating-dots">
+    <div class="dot" style="left: 12%; top: 18%; animation-duration: 3.2s; animation-delay: 0.1s;"></div>
+    <div class="dot" style="left: 83%; top: 42%; animation-duration: 2.8s; animation-delay: 0.7s;"></div>
+    <div class="dot" style="left: 31%; top: 75%; animation-duration: 3.5s; animation-delay: 1.3s;"></div>
+    <div class="dot" style="left: 56%; top: 29%; animation-duration: 3.0s; animation-delay: 0.4s;"></div>
+    <div class="dot" style="left: 7%; top: 91%; animation-duration: 2.5s; animation-delay: 1.8s;"></div>
+    <div class="dot" style="left: 68%; top: 14%; animation-duration: 3.8s; animation-delay: 0.0s;"></div>
+    <div class="dot" style="left: 44%; top: 63%; animation-duration: 2.9s; animation-delay: 2.1s;"></div>
+    <div class="dot" style="left: 92%; top: 8%; animation-duration: 3.1s; animation-delay: 0.9s;"></div>
+    <div class="dot" style="left: 19%; top: 48%; animation-duration: 2.6s; animation-delay: 1.5s;"></div>
+    <div class="dot" style="left: 73%; top: 82%; animation-duration: 3.4s; animation-delay: 0.2s;"></div>
+    <div class="dot" style="left: 38%; top: 36%; animation-duration: 2.7s; animation-delay: 2.4s;"></div>
+    <div class="dot" style="left: 51%; top: 96%; animation-duration: 3.9s; animation-delay: 0.6s;"></div>
+    <div class="dot" style="left: 26%; top: 22%; animation-duration: 3.3s; animation-delay: 1.1s;"></div>
+    <div class="dot" style="left: 61%; top: 57%; animation-duration: 2.4s; animation-delay: 1.9s;"></div>
+    <div class="dot" style="left: 14%; top: 70%; animation-duration: 3.7s; animation-delay: 0.8s;"></div>
+    <div class="dot" style="left: 47%; top: 11%; animation-duration: 2.9s; animation-delay: 2.2s;"></div>
+    <div class="dot" style="left: 85%; top: 34%; animation-duration: 3.6s; animation-delay: 0.3s;"></div>
+    <div class="dot" style="left: 3%; top: 54%; animation-duration: 2.5s; animation-delay: 1.4s;"></div>
+    <div class="dot" style="left: 95%; top: 77%; animation-duration: 3.2s; animation-delay: 2.0s;"></div>
+    <div class="dot" style="left: 40%; top: 89%; animation-duration: 2.8s; animation-delay: 0.5s;"></div>
+  </div>
+
+  <div id="app" class="flex flex-col h-screen w-full">
+    <!-- Header (фиксированный) на всю ширину -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-[#0B1E33]/95 backdrop-blur-md border-b border-white/10">
+      <div class="w-full px-4 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+          <!-- Logo -->
+          <div class="flex items-center gap-3 group cursor-pointer" id="logo">
+            <div class="relative">
+              <i data-lucide="shield" class="w-10 h-10 text-[#00FF94] group-hover:scale-110 transition-transform"></i>
+              <div class="absolute inset-0 bg-[#00FF94]/20 blur-xl group-hover:bg-[#00FF94]/40 transition-all"></div>
+            </div>
+            <span class="text-2xl font-bold bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] bg-clip-text text-transparent">
+              КиберЩит
+            </span>
+          </div>
+
+          <!-- Desktop Navigation -->
+          <div class="hidden lg:flex items-center gap-1">
+            <button class="nav-item px-4 py-2 rounded-lg transition-all text-white/80 hover:text-white hover:bg-white/5" onclick="startLearning('phone')">Телефон</button>
+            <button class="nav-item px-4 py-2 rounded-lg transition-all text-white/80 hover:text-white hover:bg-white/5" onclick="startLearning('internet')">Интернет</button>
+            <button class="nav-item px-4 py-2 rounded-lg transition-all text-white/80 hover:text-white hover:bg-white/5" onclick="startLearning('computer')">Компьютер</button>
+            <button class="nav-item px-4 py-2 rounded-lg transition-all text-white/80 hover:text-white hover:bg-white/5" onclick="navigateTo('quiz')">Квиз</button>
+            <button class="nav-item px-4 py-2 rounded-lg transition-all text-white/80 hover:text-white hover:bg-white/5" onclick="navigateTo('game')">Найди мошенника</button>
+          </div>
+
+          <!-- Mobile Menu Button -->
+          <button class="lg:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors" id="mobileMenuBtn">
+            <i data-lucide="menu" size="24"></i>
+          </button>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div id="mobileNav" class="lg:hidden hidden py-4 space-y-2">
+          <button class="block w-full px-4 py-3 rounded-lg text-left text-white/80 hover:bg-white/5" onclick="startLearning('phone')">Телефон</button>
+          <button class="block w-full px-4 py-3 rounded-lg text-left text-white/80 hover:bg-white/5" onclick="startLearning('internet')">Интернет</button>
+          <button class="block w-full px-4 py-3 rounded-lg text-left text-white/80 hover:bg-white/5" onclick="startLearning('computer')">Компьютер</button>
+          <button class="block w-full px-4 py-3 rounded-lg text-left text-white/80 hover:bg-white/5" onclick="navigateTo('quiz')">Квиз</button>
+          <button class="block w-full px-4 py-3 rounded-lg text-left text-white/80 hover:bg-white/5" onclick="navigateTo('game')">Найди мошенника</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Основной контент (с отступом под фиксированный header) на всю ширину -->
+    <main id="screenContent" class="flex-1 flex flex-col items-center justify-start w-full pt-24"></main>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // Состояние приложения
+    let currentScreen = 'home'; // home, topicSelect, learning, checkSelect, quiz, game
+    let currentTopic = 'phone'; // phone, internet, computer
+    let learningStep = 0;
+    let quizState = {
+      currentQuestion: 0,
+      selectedAnswer: null,
+      showExplanation: false,
+      score: 0,
+      questions: [
+        { question: "Что делать, если тебе пришло SMS с кодом подтверждения, который ты не запрашивал?", options: ["Сообщить код отправителю, если он просит", "Игнорировать и никому не сообщать", "Позвонить в банк и уточнить", "Отправить код другу для проверки"], correct: 1, explanation: "Никогда и никому не сообщайте код из SMS. Если звонят из 'банка' и просят код — это мошенники." },
+        { question: "Какой способ блокировки экрана самый надёжный?", options: ["Графический ключ", "PIN-код 1234", "Длинный пароль", "Отпечаток пальца"], correct: 2, explanation: "Длинный пароль сложнее подобрать, чем графический ключ или короткий PIN. Биометрия удобна, но не защищает от государства." },
+        { question: "Какое разрешение приложения должно насторожить?", options: ["Доступ к интернету", "Доступ к контактам для фонарика", "Доступ к камере для фото", "Доступ к уведомлениям"], correct: 1, explanation: "Если фонарик просит доступ к контактам — это явный признак мошенничества." },
+        { question: "Что такое VPN?", options: ["Вид вируса", "Сервис для скрытия IP и шифрования трафика", "Программа для ускорения интернета", "Антивирус"], correct: 1, explanation: "VPN шифрует ваш трафик и скрывает реальный IP, но бесплатные VPN могут быть опасны." },
+        { question: "Звонок из 'службы безопасности банка' — что делать?", options: ["Назвать данные карты", "Перезвонить в банк по номеру на карте", "Перевести деньги на безопасный счёт", "Следовать инструкциям"], correct: 1, explanation: "Положите трубку и сами перезвоните в банк по номеру с обратной стороны карты." },
+        { question: "Нужен ли антивирус на современном iPhone?", options: ["Да, обязательно", "Нет, iOS достаточно защищена, если не делать джейлбрейк", "Только платный", "Качает батарею"], correct: 1, explanation: "iOS имеет встроенную защиту, и приложения из App Store проверяются. Антивирус не нужен, если вы не устанавливаете пиратские приложения." },
+        { question: "Чем опасны пиратские сборки Windows?", options: ["Замедляют компьютер", "Могут содержать вирусы и трояны", "Не получают обновления", "Всё вышеперечисленное"], correct: 3, explanation: "Пиратские сборки часто содержат скрытые майнеры, трояны и не получают важные обновления безопасности." },
+        { question: "Какой пароль можно считать надёжным?", options: ["123456", "qwerty", "P@ssw0rd", "my cat is fluffy 2026!"], correct: 3, explanation: "Надёжный пароль должен быть длинным, содержать буквы разного регистра, цифры и символы. Фраза с пробелами и цифрами — отличный вариант." },
+        { question: "Что такое фишинг?", options: ["Вид рыбалки", "Поддельные сайты для кражи данных", "Вредоносная программа", "Спам-рассылка"], correct: 1, explanation: "Фишинг — это создание поддельных сайтов, которые выглядят как настоящие, чтобы украсть ваши логины и пароли." },
+        { question: "Что оставляет цифровой след?", options: ["Запросы в поисковиках", "Посещённые сайты", "Фото и комментарии", "Всё перечисленное"], correct: 3, explanation: "Цифровой след включает любые ваши действия в интернете: поиск, посещения сайтов, публикации, лайки." }
+      ]
+    };
+    let gameState = {
+      currentMessage: 0,
+      selectedAnswer: null,
+      showResult: false,
+      score: 0,
+      messages: [
+        { type: "sms", from: "+7 (900) 123-45-67", message: "Ваша карта заблокирована! Для разблокировки перейдите по ссылке: hxxp://sber-unlock.ru и введите данные карты. Служба безопасности Сбербанка.", isScam: true, redFlags: ["Подозрительный номер телефона", "Ссылка на левый сайт (не sberbank.ru)", "Требование ввести данные карты", "Срочность и паника"], explanation: "Это классический фишинг! Банк никогда не просит вводить данные карты по ссылке из SMS. Официальный сайт Сбербанка — sberbank.ru, а не sber-unlock.ru." },
+        { type: "email", from: "support@appl-suport.com", subject: "Подтвердите свой Apple ID", message: "Здравствуйте!\n\nМы обнаружили подозрительную активность в вашем аккаунте Apple ID. Для подтверждения владения аккаунтом перейдите по ссылке и введите свой логин и пароль:\n\nhxxps://appl-suport.com/verify\n\nЕсли вы не подтвердите аккаунт в течение 24 часов, он будет заблокирован.\n\nС уважением,\nКоманда Apple", isScam: true, redFlags: ["Опечатка в домене (appl-suport вместо apple.com)", "Требование срочных действий", "Запрос логина и пароля по ссылке", "Угроза блокировки"], explanation: "Поддельный email! Apple никогда не просит пароль по ссылке. Официальный домен Apple — apple.com. Опечатка в домене (appl-suport) — явный признак фишинга." },
+        { type: "sms", from: "Sberbank", message: "Покупка на сумму 15 234,50 руб. Карта *4523. Если это не вы, позвоните 900. Доступно: 45 122,30 руб.", isScam: false, redFlags: [], explanation: "Это легитимное SMS от банка! Номер отправителя — официальное имя банка, нет ссылок, нет требований ввести данные. Указан номер 900 — официальная горячая линия Сбербанка." },
+        { type: "sms", from: "+7 (999) 888-77-66", message: "Мама, я разбил телефон! Срочно переведи 25000₽ на этот номер: 2202 2006 1234 5678. Очень нужно! Позже объясню.", isScam: true, redFlags: ["Неизвестный номер", "Давление на эмоции (срочность)", "Просьба перевести деньги", "Нет подтверждения личности"], explanation: "Схема 'Мама, помоги!' — мошенники эксплуатируют страх за близких. Всегда перезванивай на известный номер родственника, чтобы проверить!" },
+        { type: "email", from: "delivery@cdek.ru", subject: "Ваша посылка ожидает получения", message: "Добрый день!\n\nВаша посылка № 1234567890 прибыла в пункт выдачи по адресу: ул. Ленина, 15.\n\nВы можете забрать её в течение 5 дней. При себе иметь паспорт и код: 9876.\n\nСпасибо за выбор СДЭК!", isScam: false, redFlags: [], explanation: "Легитимное письмо от службы доставки. Официальный домен cdek.ru, нет ссылок для ввода данных, конкретная информация о посылке." },
+        { type: "sms", from: "+7 (926) 555-12-34", message: "Код подтверждения: 4829. Никому не сообщайте этот код. Если вы не запрашивали код, игнорируйте это сообщение.", isScam: false, redFlags: [], explanation: "Это нормальное SMS с кодом. Главное — никому его не сообщать! Если ты не запрашивал код, просто игнорируй сообщение." },
+        { type: "email", from: "winner@lottery-2026.biz", subject: "🎉 Поздравляем! Вы выиграли 1 000 000 рублей!", message: "ПОЗДРАВЛЯЕМ!!!\n\nВаш email выиграл в международной лотерее! Сумма выигрыша: 1 000 000 рублей!\n\nДля получения приза заполните форму:\nhxxps://lottery-2026.biz/claim?id=123456\n\nУкажите:\n- ФИО\n- Номер паспорта\n- Номер карты для перевода\n\nПоторопитесь! Предложение действует 48 часов!", isScam: true, redFlags: ["Подозрительный домен (.biz вместо официального)", "Обещание лёгких денег", "Запрос паспортных данных и номера карты", "Искусственная срочность", "Ты не участвовал ни в какой лотерее"], explanation: "100% мошенничество! Бесплатный сыр бывает только в мышеловке. Никто не разыгрывает деньги просто так. Цель — украсть твои личные данные и деньги с карты." },
+        { type: "sms", from: "Gosuslugi", message: "Вам доступна выплата от государства 15000₽. Оформите на сайте gosuslugi-2026.online. Срок действия: 3 дня.", isScam: true, redFlags: ["Поддельный домен (gosuslugi-2026.online вместо gosuslugi.ru)", "Обещание денег 'просто так'", "Искусственная срочность"], explanation: "Фишинг под видом госуслуг! Официальный сайт — только gosuslugi.ru. Никаких 'выплат просто так' не бывает. Это попытка украсть доступ к твоему аккаунту." }
+      ]
+    };
+
+    // Данные для пошагового обучения (без изменений)
+    const phoneSteps = [
+      { icon: 'smartphone', title: 'SIM-карта: номер с историей и PIN-код', content: 'Купил новую SIM-карту? Отлично! А если номер достался от прошлого владельца, у тебя могут быть проблемы.<br><br>Почему важно сменить PIN:<br>• Если кто-то вытащит твою SIM-карту, PIN защитит её от использования.<br>• Без PIN злоумышленник может вставить SIM в другой телефон и получить доступ к твоим SMS с кодами.<br>• Меняй PIN на уникальный, который знаешь только ты (не дату рождения!).' },
+      { icon: 'lock', title: 'Блокировка экрана', content: 'Сравнение методов:<br><br><table class="w-full text-sm"><tr><th>Метод</th><th>Плюсы</th><th>Минусы</th><th>Уровень</th></tr><tr><td>Графический ключ</td><td>Быстро</td><td>Просто подсмотреть</td><td>3/5</td></tr><tr><td>PIN 4 цифры</td><td>Просто</td><td>Легко подобрать</td><td>2/5</td></tr><tr><td>Длинный пароль</td><td>Надёжно</td><td>Долго вводить</td><td>5/5</td></tr><tr><td>Отпечаток пальца</td><td>Удобно</td><td>Можно подделать</td><td>4/5</td></tr><tr><td>Распознавание лица</td><td>Быстро</td><td>Не всегда надёжно</td><td>3/5</td></tr></table><br>Лучшая комбинация: длинный пароль + биометрия.' },
+      { icon: 'alert-triangle', title: 'Опасные приложения и разрешения', content: 'Какие разрешения должны насторожить:<br>• Доступ к контактам — для приложения-фонарика<br>• Доступ к микрофону — для калькулятора<br>• Доступ к SMS — для любой игры<br>• Доступ к местоположению — для погоды (но не для игр)<br>• Доступ к камере — для сканера QR-кодов (но не для блокнота)<br><br>Как защититься: скачивай приложения только из официальных магазинов, проверяй разрешения перед установкой.' },
+      { icon: 'bug', title: 'Вирусы и антивирусы', content: 'Признаки заражения телефона:<br>• Резкое падение производительности<br>• Появление незнакомых приложений<br>• Всплывающая реклама<br>• Необъяснимые списания с карты<br><br>Нужен ли антивирус? На Android — желательно, на iOS — достаточно стандартной защиты. Рекомендуемые антивирусы: Kaspersky, Avast, Malwarebytes.' }
+    ];
+    const internetSteps = [
+      { icon: 'eye', title: 'Цифровой след', content: 'Что входит в твой цифровой след:<br>• Запросы в поисковиках<br>• Посещённые сайты<br>• Фотографии и видео<br>• Сообщения и комментарии<br>• Лайки и репосты<br><br>Как чистить следы: используй режим инкогнито, регулярно удаляй историю и cookie, отключай сбор данных в настройках.' },
+      { icon: 'shield', title: 'VPN и PROXY', content: 'VPN шифрует трафик и скрывает ваш IP.<br>Плюсы: защита в публичных сетях, обход блокировок.<br>Риски бесплатных VPN: они могут сами собирать и продавать ваши данные.<br>Совет: выбирайте платные проверенные VPN (например, ProtonVPN, Mullvad) или используйте надёжные расширения.' },
+      { icon: 'message-square', title: 'Коды из SMS', content: 'ЖЕЛЕЗНОЕ ПРАВИЛО: НИКОМУ И НИКОГДА НЕ СООБЩАЙ КОД ИЗ SMS!<br>Схемы мошенников: звонок из "банка", "полиции", "службы безопасности". Они могут представиться кем угодно, но цель одна — код. Клади трубку и перезванивай по официальному номеру.' },
+      { icon: 'credit-card', title: 'Банковские карты', content: 'Правила безопасной оплаты онлайн:<br>• Не храните данные карты на сайтах<br>• Используйте виртуальные карты для интернет-покупок<br>• Проверяйте, что сайт защищён (https)<br>• Не вводите данные карты на подозрительных страницах<br>• Подключите 3D-Secure<br>• Регулярно проверяйте выписки' }
+    ];
+    const computerSteps = [
+      { icon: 'monitor', title: 'Windows и пиратские сборки', content: 'Пиратская Windows — это как взломанный замок на двери. Да, работает, но кто знает, кто ещё имеет ключ?<br>Чем опасны пиратские сборки:<br>• Встроенные вирусы и трояны (крадут пароли и данные карт)<br>• Скрытый майнинг криптовалюты (компьютер тормозит)<br>• Отсутствие обновлений безопасности<br>• Нестабильность системы<br>• Проблемы с лицензионным ПО<br><br>Безопасные варианты: покупать лицензию, использовать официальную пробную версию, перейти на Linux.' },
+      { icon: 'key', title: 'Пароли', content: 'Зачем нужны сложные пароли: даже если база данных сайта утекла, злоумышленники не смогут подобрать пароль быстро.<br><br>Примерное время взлома:<br>• 123456 — мгновенно<br>• qwerty123 — несколько секунд<br>• P@ssw0rd — несколько минут<br>• MyDogIsTheBest!2026 — несколько лет<br><br>Используйте менеджеры паролей (Bitwarden, LastPass) и включайте двухфакторную аутентификацию.' },
+      { icon: 'shield-check', title: 'Антивирусы и защита', content: 'Сравнение вариантов:<br>• Встроенный Защитник Windows — достаточно для обычного пользователя<br>• Kaspersky Free — хороший бесплатный вариант<br>• Malwarebytes — дополнительный сканер<br><br>Признаки фишингового письма: срочность, ошибки, подозрительный адрес отправителя, ссылка не на официальный домен.' }
+    ];
+
+    // Маскот (без изменений)
+    function getMascotSVG(variant = 'happy', className = 'w-20 h-20') {
+      let mouthPath, pointingFinger = '';
+      if (variant === 'thinking') {
+        mouthPath = '<path d="M45 65 Q60 68 75 65" stroke="#0B1E33" stroke-width="3" stroke-linecap="round" fill="none"/>';
+      } else if (variant === 'happy') {
+        mouthPath = '<path d="M45 62 Q60 72 75 62" stroke="#0B1E33" stroke-width="3" stroke-linecap="round" fill="none"/>';
+      } else if (variant === 'winking') {
+        mouthPath = '<path d="M45 62 Q60 70 75 62" stroke="#0B1E33" stroke-width="3" stroke-linecap="round" fill="none"/>';
+      } else {
+        mouthPath = '<path d="M45 62 Q60 72 75 62" stroke="#0B1E33" stroke-width="3" stroke-linecap="round" fill="none"/>';
+      }
+
+      let leftEye, rightEye;
+      if (variant === 'winking') {
+        leftEye = '<circle cx="48" cy="48" r="1" fill="#0B1E33"/>';
+        rightEye = '<circle cx="72" cy="48" r="5" fill="#0B1E33"/>';
+      } else {
+        leftEye = '<circle cx="48" cy="48" r="5" fill="#0B1E33" class="mascot-eye-left"/>';
+        rightEye = '<circle cx="72" cy="48" r="5" fill="#0B1E33"/>';
+      }
+
+      if (variant === 'pointing') {
+        pointingFinger = `
+          <path class="pointing-finger" d="M85 45 L100 35 L105 38 L90 48 Z" fill="#00FF94" stroke="#0B1E33" stroke-width="2"/>
+        `;
+      }
+
+      return `
+        <svg width="120" height="120" viewBox="-5 -5 130 130" class="mascot-container mascot-glow ${className}">
+          <path d="M60 10 L90 25 L90 55 Q90 85 60 110 Q30 85 30 55 L30 25 Z" fill="#00FF94" stroke="#0B1E33" stroke-width="3"/>
+          <path d="M60 20 L80 30 L80 52 Q80 75 60 95 Q40 75 40 52 L40 30 Z" fill="#0B1E33" opacity="0.3"/>
+          ${leftEye}
+          ${rightEye}
+          ${mouthPath}
+          <g transform="translate(60,70)">
+            <rect x="-8" y="-3" width="16" height="12" rx="2" fill="#2D7EE7" />
+            <path d="M -5 -3 L -5 -8 Q -5 -12 0 -12 Q 5 -12 5 -8 L 5 -3" fill="none" stroke="#2D7EE7" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="0" cy="2" r="2" fill="#0B1E33" />
+          </g>
+          ${pointingFinger}
+          <g class="mascot-antenna">
+            <line x1="50" y1="10" x2="50" y2="2" stroke="#2D7EE7" stroke-width="2" />
+            <circle cx="50" cy="2" r="3" fill="#2D7EE7" />
+            <line x1="70" y1="10" x2="70" y2="2" stroke="#2D7EE7" stroke-width="2" />
+            <circle cx="70" cy="2" r="3" fill="#2D7EE7" />
+          </g>
+        </svg>
+      `;
+    }
+
+    // ==================== НОВЫЕ ФУНКЦИИ ДЛЯ ОЗВУЧКИ ====================
+    // Озвучка текста через Web Speech API
+    function speakText(text) {
+      if (!window.speechSynthesis) {
+        console.warn("Браузер не поддерживает речевой синтез.");
+        return;
+      }
+      // Останавливаем текущую речь
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ru-RU';
+      utterance.rate = 0.9;      // чуть медленнее
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+
+      // Можно выбрать русский голос, если он доступен (необязательно)
+      // const voices = window.speechSynthesis.getVoices();
+      // const russianVoice = voices.find(v => v.lang === 'ru-RU');
+      // if (russianVoice) utterance.voice = russianVoice;
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Озвучить текущий шаг обучения
+    function speakCurrentStep() {
+      let steps;
+      if (currentTopic === 'phone') steps = phoneSteps;
+      else if (currentTopic === 'internet') steps = internetSteps;
+      else steps = computerSteps;
+
+      const step = steps[learningStep];
+      // Удаляем HTML-теги из содержимого
+      const plainContent = step.content.replace(/<[^>]*>/g, '');
+      const textToSpeak = step.title + '. ' + plainContent;
+      speakText(textToSpeak);
+    }
+
+    // Остановить речь (будем вызывать при смене экрана/шага)
+    function stopSpeech() {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    }
+    // ===================================================================
+
+    // Рендер текущего экрана
+    function renderScreen() {
+      const content = document.getElementById('screenContent');
+      let html = '';
+
+      if (currentScreen === 'home') {
+        html = renderHome();
+      } else if (currentScreen === 'topicSelect') {
+        html = renderTopicSelect();
+      } else if (currentScreen === 'learning') {
+        html = renderLearning();
+      } else if (currentScreen === 'checkSelect') {
+        html = renderCheckSelect();
+      } else if (currentScreen === 'quiz') {
+        html = renderQuiz();
+      } else if (currentScreen === 'game') {
+        html = renderGame();
+      }
+
+      content.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function renderHome() {
+      return `
+        <div class="min-h-screen w-full flex items-center justify-center">
+          <div class="w-full px-4 lg:px-8 max-w-6xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+              <div class="text-center lg:text-left">
+                <h1 class="text-5xl lg:text-7xl font-bold mb-6 py-2">
+                  <span class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] bg-clip-text text-transparent">Проверь свою киберсилу! </span>
+                  <span>🔥</span>
+                </h1>
+                <p class="text-xl lg:text-2xl text-white/80 mb-8 leading-relaxed">Всего 30 минут — и ты научишься защищать телефон, компьютер и личные данные от мошенников. Играй и узнавай!</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                  <button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105" onclick="navigateTo('topicSelect')">Пройти обучение</button>
+                  <button class="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold text-lg border border-white/20 hover:bg-white/20 hover:border-[#00FF94]/50 transition-all hover:scale-105" onclick="navigateTo('checkSelect')">Проверить знания</button>
+                </div>
+              </div>
+              <div class="flex justify-center">
+                <div class="relative">
+                  ${getMascotSVG('pointing', 'w-64 h-64 lg:w-96 lg:h-96')}
+                  <div class="absolute -z-10 inset-0 bg-gradient-to-br from-[#00FF94]/30 to-[#2D7EE7]/30 blur-3xl animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ========== ЭКРАН ВЫБОРА ТЕМЫ ==========
+    function renderTopicSelect() {
+      return `
+        <div class="min-h-screen w-full flex items-start justify-center pt-16">
+          <div class="w-full px-4 lg:px-8 max-w-6xl mx-auto">
+            <h2 class="text-4xl lg:text-5xl font-bold text-white text-center mb-10">Выбери тему для обучения</h2>
+            <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+              <!-- Телефон -->
+              <div class="topic-card">
+                <div class="w-40 h-40 topic-figure">
+                  <svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl">
+                    <defs>
+                      <linearGradient id="gradPhone" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#00FF94"/>
+                        <stop offset="100%" stop-color="#2D7EE7"/>
+                      </linearGradient>
+                    </defs>
+                    <rect x="25" y="5" width="70" height="105" rx="12" fill="url(#gradPhone)" stroke="#0B1E33" stroke-width="3"/>
+                    <rect x="35" y="18" width="50" height="80" rx="5" fill="#0B1E33" opacity="0.8"/>
+                    <rect x="40" y="12" width="40" height="3" rx="1.5" fill="#2D7EE7" stroke="#0B1E33" stroke-width="1"/>
+                    <circle cx="60" cy="23" r="2" fill="#00FF94" stroke="#0B1E33" stroke-width="1"/>
+                    <circle cx="60" cy="103" r="3" fill="#2D7EE7" stroke="#0B1E33" stroke-width="2"/>
+                  </svg>
+                </div>
+                <button class="topic-button" onclick="startLearning('phone')">Телефон</button>
+              </div>
+              <!-- Интернет -->
+              <div class="topic-card">
+                <div class="w-40 h-40 topic-figure">
+                  <svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl">
+                    <defs>
+                      <linearGradient id="gradGlobe" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#00FF94"/>
+                        <stop offset="100%" stop-color="#2D7EE7"/>
+                      </linearGradient>
+                    </defs>
+                    <circle cx="60" cy="60" r="35" fill="url(#gradGlobe)" stroke="#0B1E33" stroke-width="3"/>
+                    <ellipse cx="60" cy="60" rx="40" ry="15" fill="none" stroke="#0B1E33" stroke-width="3"/>
+                    <ellipse cx="60" cy="60" rx="15" ry="40" fill="none" stroke="#0B1E33" stroke-width="3"/>
+                    <circle cx="50" cy="50" r="6" fill="#2D7EE7" opacity="0.8"/>
+                    <circle cx="70" cy="70" r="6" fill="#2D7EE7" opacity="0.8"/>
+                    <circle cx="45" cy="75" r="5" fill="#2D7EE7" opacity="0.8"/>
+                    <ellipse cx="60" cy="60" rx="45" ry="20" fill="none" stroke="#2D7EE7" stroke-width="2" stroke-dasharray="4 4"/>
+                    <circle cx="100" cy="50" r="4" fill="#00FF94" stroke="#0B1E33" stroke-width="2"/>
+                    <circle cx="20" cy="20" r="2" fill="white"/>
+                    <circle cx="100" cy="20" r="2" fill="white"/>
+                    <circle cx="20" cy="100" r="2" fill="white"/>
+                  </svg>
+                </div>
+                <button class="topic-button" onclick="startLearning('internet')">Интернет</button>
+              </div>
+              <!-- Компьютер -->
+              <div class="topic-card">
+                <div class="w-40 h-40 topic-figure">
+                  <svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl">
+                    <defs>
+                      <linearGradient id="gradMonitor" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#00FF94"/>
+                        <stop offset="100%" stop-color="#2D7EE7"/>
+                      </linearGradient>
+                    </defs>
+                    <rect x="10" y="10" width="95" height="70" rx="8" fill="url(#gradMonitor)" stroke="#0B1E33" stroke-width="3"/>
+                    <rect x="20" y="20" width="75" height="50" rx="4" fill="#0B1E33" opacity="0.8"/>
+                    <circle cx="35" cy="35" r="4" fill="#00FF94"/>
+                    <circle cx="55" cy="35" r="4" fill="#2D7EE7"/>
+                    <circle cx="75" cy="35" r="4" fill="#00FF94"/>
+                    <rect x="35" y="50" width="40" height="4" rx="2" fill="#2D7EE7" opacity="0.8"/>
+                    <rect x="40" y="85" width="35" height="8" rx="3" fill="#2D7EE7" stroke="#0B1E33" stroke-width="2"/>
+                    <rect x="30" y="93" width="55" height="5" rx="2.5" fill="#2D7EE7" stroke="#0B1E33" stroke-width="2"/>
+                    <rect x="15" y="100" width="85" height="8" rx="3" fill="#2D7EE7" stroke="#0B1E33" stroke-width="2"/>
+                    <circle cx="100" cy="104" r="6" fill="#00FF94" stroke="#0B1E33" stroke-width="2"/>
+                  </svg>
+                </div>
+                <button class="topic-button" onclick="startLearning('computer')">Компьютер</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCheckSelect() {
+      return `
+        <div class="min-h-screen w-full flex items-center justify-center">
+          <div class="w-full px-4 lg:px-8 max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl lg:text-5xl font-bold text-white mb-12">Что будем проверять?</h2>
+            <div class="flex flex-col items-center gap-6">
+              <button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold text-lg w-full max-w-md hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105" onclick="navigateTo('quiz')">❓ Квиз</button>
+              <button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold text-lg w-full max-w-md hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105" onclick="navigateTo('game')">🕵️ Найди мошенника</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ========== ИСПРАВЛЕННЫЙ renderLearning с кнопкой озвучки ==========
+    function renderLearning() {
+      // Останавливаем речь при смене шага
+      stopSpeech();
+
+      let steps;
+      if (currentTopic === 'phone') steps = phoneSteps;
+      else if (currentTopic === 'internet') steps = internetSteps;
+      else steps = computerSteps;
+
+      const step = steps[learningStep];
+      const isLast = learningStep === steps.length - 1;
+
+      return `
+        <div class="min-h-screen w-full flex items-start justify-center pt-4">
+          <div class="w-full px-4 lg:px-8 max-w-3xl mx-auto">
+            <div class="text-center mb-4">
+              <div class="flex justify-between items-center text-white/60 text-sm mb-2">
+                <span>Шаг ${learningStep + 1} из ${steps.length}</span>
+                <button class="hover:text-[#00FF94]" onclick="goBack()">← Назад</button>
+              </div>
+              <div class="w-full bg-[#1a3150] rounded-full h-2 mb-4">
+                <div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-2 rounded-full" style="width: ${((learningStep + 1) / steps.length) * 100}%;"></div>
+              </div>
+            </div>
+            <!-- Карточка с относительным позиционированием -->
+            <div class="bg-[#1a3150] border border-white/10 rounded-3xl p-6 lg:p-8 mb-6 h-[650px] lg:h-[500px] overflow-y-auto relative group">
+              <!-- Кнопка-динамик (появляется при наведении) -->
+              <button class="absolute top-4 right-4 p-3 bg-black/30 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-[#00FF94]/20 z-10" 
+                      onclick="event.stopPropagation(); speakCurrentStep();"
+                      title="Озвучить">
+                <i data-lucide="volume-2" class="w-5 h-5 text-white"></i>
+              </button>
+
+              <div class="flex flex-col items-center text-center">
+                <div class="p-3 gradient-bg rounded-xl mb-4">
+                  <i data-lucide="${step.icon}" class="w-12 h-12 text-[#00FF94]"></i>
+                </div>
+                <h3 class="text-2xl lg:text-3xl font-bold text-[#00FF94] mb-4">${step.title}</h3>
+                <div class="text-white/90 text-base leading-relaxed text-left">${step.content}</div>
+              </div>
+            </div>
+            <div class="flex justify-center gap-4">
+              ${learningStep > 0 ? `<button class="px-8 py-4 bg-white/10 border border-white/20 rounded-xl text-lg font-semibold text-white hover:bg-[#2D7EE7] transition-all" onclick="prevStep()"><i data-lucide="arrow-left" class="inline mr-2"></i>Назад</button>` : ''}
+              ${!isLast ? `<button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-lg font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="nextStep()">Далее <i data-lucide="arrow-right" class="inline ml-2"></i></button>` : `<button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-lg font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="finishLearning()">Завершить</button>`}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Остальные функции рендера (quiz, game, result) остаются без изменений
+    function renderQuiz() {
+      const q = quizState.questions[quizState.currentQuestion];
+      const progress = ((quizState.currentQuestion + 1) / quizState.questions.length) * 100;
+      if (quizState.currentQuestion >= quizState.questions.length) {
+        return renderQuizResult();
+      }
+      return `
+        <div class="min-h-screen w-full pt-24 pb-12">
+          <div class="w-full px-4 lg:px-8 max-w-4xl mx-auto">
+            <div class="mb-8">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-white/60">Вопрос ${quizState.currentQuestion + 1} из ${quizState.questions.length}</span>
+                <span class="text-[#00FF94] font-semibold">Счёт: ${quizState.score}</span>
+              </div>
+              <div class="w-full bg-[#1a3150] rounded-full h-3">
+                <div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-3 rounded-full" style="width: ${progress}%;"></div>
+              </div>
+            </div>
+            <div class="bg-[#1a3150] border border-white/10 rounded-3xl p-8 lg:p-12 mb-8">
+              <div class="flex flex-col lg:flex-row gap-8 items-start">
+                <div class="flex-1">
+                  <h2 class="text-2xl lg:text-3xl font-bold text-white mb-8">${q.question}</h2>
+                  <div class="space-y-4">
+                    ${q.options.map((opt, idx) => `
+                      <button class="quiz-option w-full p-4 rounded-xl text-left transition-all ${quizState.selectedAnswer === null ? 'bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#00FF94]/50 text-white' : idx === q.correct ? 'bg-[#00FF94]/20 border-2 border-[#00FF94] text-white' : idx === quizState.selectedAnswer ? 'bg-red-500/20 border-2 border-red-500 text-white' : 'bg-white/5 border border-white/10 text-white/50'}" onclick="selectQuizAnswer(${idx})" ${quizState.selectedAnswer !== null ? 'disabled' : ''}>
+                        <div class="flex items-center gap-3">
+                          ${quizState.selectedAnswer !== null ? (idx === q.correct ? '<i data-lucide="check-circle" class="text-[#00FF94] flex-shrink-0" size="24"></i>' : idx === quizState.selectedAnswer ? '<i data-lucide="x-circle" class="text-red-500 flex-shrink-0" size="24"></i>' : '') : ''}
+                          <span class="flex-1">${opt}</span>
+                        </div>
+                      </button>
+                    `).join('')}
+                  </div>
+                </div>
+                <div class="lg:w-48 flex justify-center">
+                  ${getMascotSVG(quizState.showExplanation ? (quizState.selectedAnswer === q.correct ? 'happy' : 'thinking') : 'pointing', 'w-32 h-32 lg:w-48 lg:h-48')}
+                </div>
+              </div>
+              ${quizState.showExplanation ? `
+                <div class="mt-8 p-6 bg-[#0B1E33] rounded-xl border border-[#00FF94]/30">
+                  <h3 class="text-[#00FF94] font-semibold mb-2 flex items-center gap-2"><i data-lucide="check-circle" size="20"></i>Объяснение</h3>
+                  <p class="text-white/80 leading-relaxed">${q.explanation}</p>
+                </div>
+              ` : ''}
+            </div>
+            ${quizState.showExplanation ? `
+              <div class="flex justify-center">
+                <button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105" onclick="nextQuizQuestion()">${quizState.currentQuestion < quizState.questions.length - 1 ? 'Следующий вопрос' : 'Завершить'}</button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderQuizResult() {
+      const percent = (quizState.score / quizState.questions.length) * 100;
+      return `
+        <div class="min-h-screen w-full pt-24 pb-12">
+          <div class="w-full px-4 lg:px-8 max-w-2xl mx-auto text-center">
+            ${getMascotSVG('happy', 'w-40 h-40 mx-auto mb-8')}
+            <div class="bg-[#1a3150] border border-white/10 rounded-3xl p-8 lg:p-12 mb-8">
+              <i data-lucide="trophy" class="w-20 h-20 text-[#00FF94] mx-auto mb-6"></i>
+              <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">Квиз завершён!</h1>
+              <div class="text-6xl font-bold bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] bg-clip-text text-transparent mb-4">${quizState.score} / ${quizState.questions.length}</div>
+              <p class="text-xl text-white/80 mb-8">${percent === 100 ? 'Идеально! Ты настоящий киберэксперт! 🏆' : percent >= 80 ? 'Отлично! Ты хорошо разбираешься в безопасности! 🌟' : percent >= 60 ? 'Хорошо! Но есть куда расти! 💪' : percent >= 40 ? 'Неплохо! Рекомендую пройти материалы ещё раз 📚' : 'Нужно подучиться! Начни с главной страницы 🔄'}</p>
+              <div class="w-full bg-[#0B1E33] rounded-full h-4 mb-8">
+                <div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-4 rounded-full" style="width: ${percent}%;"></div>
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="restartQuiz()"><i data-lucide="rotate-ccw" size="20"></i>Пройти снова</button>
+              <button class="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 hover:border-[#00FF94]/50 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="goHome()"><i data-lucide="home" size="20"></i>На главную</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderGame() {
+      const msg = gameState.messages[gameState.currentMessage];
+      if (gameState.currentMessage >= gameState.messages.length) {
+        return renderGameResult();
+      }
+      return `
+        <div class="min-h-screen w-full pt-24 pb-12">
+          <div class="w-full px-4 lg:px-8 max-w-4xl mx-auto">
+            <div class="text-center mb-8">
+              <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">Найди мошенника 🕵️</h1>
+              <p class="text-xl text-white/70">Тыкай на подозрительные места и реши — это обман или нет?</p>
+            </div>
+            <div class="mb-8">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-white/60">Сообщение ${gameState.currentMessage + 1} из ${gameState.messages.length}</span>
+                <span class="text-[#00FF94] font-semibold">Счёт: ${gameState.score}</span>
+              </div>
+              <div class="w-full bg-[#1a3150] rounded-full h-3">
+                <div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-3 rounded-full" style="width: ${((gameState.currentMessage + 1) / gameState.messages.length) * 100}%;"></div>
+              </div>
+            </div>
+            <div class="max-w-md mx-auto">
+              <div class="bg-[#1a3150] border-4 border-white/20 rounded-[2.5rem] p-4 shadow-2xl">
+                <div class="bg-[#0B1E33] rounded-t-3xl p-4 mb-2">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#00FF94] to-[#2D7EE7] flex items-center justify-center"><i data-lucide="smartphone" size="20" class="text-[#0B1E33]"></i></div>
+                    <div class="flex-1">
+                      <div class="text-white font-semibold">${msg.from}</div>
+                      ${msg.subject ? `<div class="text-white/60 text-sm">${msg.subject}</div>` : ''}
+                      <div class="text-white/40 text-xs">${msg.type === 'sms' ? 'SMS' : 'Email'}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-white/5 rounded-2xl p-6 min-h-[300px]">
+                  <p class="text-white whitespace-pre-line leading-relaxed">${msg.message}</p>
+                </div>
+              </div>
+            </div>
+            ${!gameState.showResult ? `
+              <div class="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+                <button class="px-8 py-4 bg-red-500/20 border-2 border-red-500 text-white rounded-xl font-semibold hover:bg-red-500/30 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="selectGameAnswer(true)"><i data-lucide="alert-triangle" size="20"></i>Это мошенники</button>
+                <button class="px-8 py-4 bg-[#00FF94]/20 border-2 border-[#00FF94] text-white rounded-xl font-semibold hover:bg-[#00FF94]/30 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="selectGameAnswer(false)"><i data-lucide="check-circle" size="20"></i>Всё нормально</button>
+              </div>
+            ` : ''}
+            ${gameState.showResult ? `
+              <div class="mt-8">
+                <div class="p-6 rounded-2xl border-2 ${(gameState.selectedAnswer === msg.isScam) ? 'bg-[#00FF94]/10 border-[#00FF94]' : 'bg-red-500/10 border-red-500'}">
+                  <div class="flex items-center gap-3 mb-4">
+                    ${(gameState.selectedAnswer === msg.isScam) ? '<i data-lucide="check-circle" class="text-[#00FF94]" size="32"></i>' : '<i data-lucide="x-circle" class="text-red-500" size="32"></i>'}
+                    <h3 class="text-2xl font-bold text-white">${(gameState.selectedAnswer === msg.isScam) ? 'Правильно!' : 'Неправильно!'}</h3>
+                  </div>
+                  <p class="text-white/80 mb-4 leading-relaxed">${msg.explanation}</p>
+                  ${msg.isScam && msg.redFlags.length > 0 ? `
+                    <div class="mt-4 p-4 bg-[#0B1E33] rounded-xl">
+                      <h4 class="text-[#00FF94] font-semibold mb-2 flex items-center gap-2"><i data-lucide="alert-triangle" size="18"></i>Красные флаги:</h4>
+                      <ul class="space-y-1">${msg.redFlags.map(f => `<li class="text-white/70 text-sm flex items-start gap-2"><span class="text-red-500 mt-1">•</span><span>${f}</span></li>`).join('')}</ul>
+                    </div>
+                  ` : ''}
+                  <button class="mt-6 w-full px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105" onclick="nextGameMessage()">${gameState.currentMessage < gameState.messages.length - 1 ? 'Следующее сообщение' : 'Завершить'}</button>
+                </div>
+              </div>
+            ` : ''}
+            <div class="flex justify-center mt-8">
+              ${getMascotSVG(gameState.showResult ? (gameState.selectedAnswer === msg.isScam ? 'happy' : 'thinking') : 'winking', 'w-32 h-32')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderGameResult() {
+      const percent = (gameState.score / gameState.messages.length) * 100;
+      return `
+        <div class="min-h-screen w-full pt-24 pb-12">
+          <div class="w-full px-4 lg:px-8 max-w-2xl mx-auto text-center">
+            ${getMascotSVG('happy', 'w-40 h-40 mx-auto mb-8')}
+            <div class="bg-[#1a3150] border border-white/10 rounded-3xl p-8 lg:p-12 mb-8">
+              <i data-lucide="alert-triangle" class="w-20 h-20 text-[#00FF94] mx-auto mb-6"></i>
+              <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">Детектив завершён!</h1>
+              <div class="text-6xl font-bold bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] bg-clip-text text-transparent mb-4">${gameState.score} / ${gameState.messages.length}</div>
+              <p class="text-xl text-white/80 mb-8">${percent === 100 ? 'Идеально! Ты — настоящий детектив мошенничества! 🕵️' : percent >= 75 ? 'Отлично! Мошенникам будет сложно тебя обмануть! 🌟' : percent >= 50 ? 'Хорошо! Но будь внимательнее! 👀' : 'Нужно быть осторожнее! Пройди ещё раз! 🔄'}</p>
+              <div class="w-full bg-[#0B1E33] rounded-full h-4 mb-8">
+                <div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-4 rounded-full" style="width: ${percent}%;"></div>
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="restartGame()"><i data-lucide="rotate-ccw" size="20"></i>Пройти снова</button>
+              <button class="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 hover:border-[#00FF94]/50 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="goHome()"><i data-lucide="home" size="20"></i>На главную</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ========== НАВИГАЦИОННЫЕ ФУНКЦИИ (с остановкой речи) ==========
+    window.navigateTo = function(screen) {
+      stopSpeech();
+      if (screen === 'quiz') {
+        quizState.currentQuestion = 0;
+        quizState.selectedAnswer = null;
+        quizState.showExplanation = false;
+        quizState.score = 0;
+        currentScreen = 'quiz';
+      } else if (screen === 'game') {
+        gameState.currentMessage = 0;
+        gameState.selectedAnswer = null;
+        gameState.showResult = false;
+        gameState.score = 0;
+        currentScreen = 'game';
+      } else {
+        currentScreen = screen;
+      }
+      renderScreen();
+    };
+
+    window.goHome = function() {
+      stopSpeech();
+      currentScreen = 'home';
+      renderScreen();
+    };
+
+    window.goBack = function() {
+      stopSpeech();
+      if (currentScreen === 'learning') {
+        currentScreen = 'topicSelect';
+        renderScreen();
+      } else {
+        goHome();
+      }
+    };
+
+    window.startLearning = function(topic) {
+      stopSpeech();
+      currentTopic = topic;
+      learningStep = 0;
+      currentScreen = 'learning';
+      renderScreen();
+    };
+
+    window.nextStep = function() {
+      stopSpeech();
+      let steps;
+      if (currentTopic === 'phone') steps = phoneSteps;
+      else if (currentTopic === 'internet') steps = internetSteps;
+      else steps = computerSteps;
+      if (learningStep < steps.length - 1) {
+        learningStep++;
+        renderScreen();
+      }
+    };
+
+    window.prevStep = function() {
+      stopSpeech();
+      if (learningStep > 0) {
+        learningStep--;
+        renderScreen();
+      }
+    };
+
+    window.finishLearning = function() {
+      stopSpeech();
+      currentScreen = 'topicSelect';
+      renderScreen();
+    };
+
+    window.selectQuizAnswer = function(idx) {
+      if (quizState.selectedAnswer !== null) return;
+      quizState.selectedAnswer = idx;
+      quizState.showExplanation = true;
+      if (idx === quizState.questions[quizState.currentQuestion].correct) {
+        quizState.score++;
+      }
+      renderScreen();
+    };
+
+    window.nextQuizQuestion = function() {
+      if (quizState.currentQuestion < quizState.questions.length - 1) {
+        quizState.currentQuestion++;
+        quizState.selectedAnswer = null;
+        quizState.showExplanation = false;
+      } else {
+        quizState.currentQuestion = quizState.questions.length;
+      }
+      renderScreen();
+    };
+
+    window.restartQuiz = function() {
+      stopSpeech();
+      quizState.currentQuestion = 0;
+      quizState.selectedAnswer = null;
+      quizState.showExplanation = false;
+      quizState.score = 0;
+      renderScreen();
+    };
+
+    window.selectGameAnswer = function(isScam) {
+      if (gameState.selectedAnswer !== null) return;
+      gameState.selectedAnswer = isScam;
+      gameState.showResult = true;
+      if (isScam === gameState.messages[gameState.currentMessage].isScam) {
+        gameState.score++;
+      }
+      renderScreen();
+    };
+
+    window.nextGameMessage = function() {
+      if (gameState.currentMessage < gameState.messages.length - 1) {
+        gameState.currentMessage++;
+        gameState.selectedAnswer = null;
+        gameState.showResult = false;
+      } else {
+        gameState.currentMessage = gameState.messages.length;
+      }
+      renderScreen();
+    };
+
+    window.restartGame = function() {
+      stopSpeech();
+      gameState.currentMessage = 0;
+      gameState.selectedAnswer = null;
+      gameState.showResult = false;
+      gameState.score = 0;
+      renderScreen();
+    };
+
+    // Обработчики UI
+    document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+      const nav = document.getElementById('mobileNav');
+      nav.classList.toggle('hidden');
+    });
+
+    document.getElementById('logo').addEventListener('click', goHome);
+
+    renderScreen();
+  </script>
+</body>
+</html>
