@@ -6,10 +6,8 @@
   <title>КиберЩит — защити себя</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
+  <!-- Lucide Icons (только для остальных иконок) -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Edge-TTS для качественной озвучки (UMD) -->
-  <script src="https://cdn.jsdelivr.net/npm/@edge-tts/universal@latest/dist/edge-tts-universal.umd.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     * {
@@ -228,7 +226,7 @@
   </div>
 
   <div id="app" class="flex flex-col h-screen w-full">
-    <!-- Header (фиксированный) -->
+    <!-- Header (фиксированный) на всю ширину -->
     <header class="fixed top-0 left-0 right-0 z-50 bg-[#0B1E33]/95 backdrop-blur-md border-b border-white/10">
       <div class="w-full px-4 lg:px-8">
         <div class="flex items-center justify-between h-20">
@@ -269,7 +267,7 @@
       </div>
     </header>
 
-    <!-- Основной контент -->
+    <!-- Основной контент (с отступом под фиксированный header) на всю ширину -->
     <main id="screenContent" class="flex-1 flex flex-col items-center justify-start w-full pt-24"></main>
   </div>
 
@@ -315,7 +313,7 @@
       ]
     };
 
-    // Данные для пошагового обучения
+    // Данные для пошагового обучения (без изменений)
     const phoneSteps = [
       { icon: 'smartphone', title: 'SIM-карта: номер с историей и PIN-код', content: 'Купил новую SIM-карту? Отлично! А если номер достался от прошлого владельца, у тебя могут быть проблемы.<br><br>Почему важно сменить PIN:<br>• Если кто-то вытащит твою SIM-карту, PIN защитит её от использования.<br>• Без PIN злоумышленник может вставить SIM в другой телефон и получить доступ к твоим SMS с кодами.<br>• Меняй PIN на уникальный, который знаешь только ты (не дату рождения!).' },
       { icon: 'lock', title: 'Блокировка экрана', content: 'Сравнение методов:<br><br><table class="w-full text-sm"><tr><th>Метод</th><th>Плюсы</th><th>Минусы</th><th>Уровень</th></tr><tr><td>Графический ключ</td><td>Быстро</td><td>Просто подсмотреть</td><td>3/5</td></tr><tr><td>PIN 4 цифры</td><td>Просто</td><td>Легко подобрать</td><td>2/5</td></tr><tr><td>Длинный пароль</td><td>Надёжно</td><td>Долго вводить</td><td>5/5</td></tr><tr><td>Отпечаток пальца</td><td>Удобно</td><td>Можно подделать</td><td>4/5</td></tr><tr><td>Распознавание лица</td><td>Быстро</td><td>Не всегда надёжно</td><td>3/5</td></tr></table><br>Лучшая комбинация: длинный пароль + биометрия.' },
@@ -385,105 +383,51 @@
       `;
     }
 
-    // ==================== НОВАЯ ОЗВУЧКА ЧЕРЕЗ EDGE-TTS ====================
-    let currentAudio = null;           // текущий элемент Audio
-    let currentSpeakingStepId = null;  // идентификатор озвучиваемого шага (currentTopic + '_' + learningStep)
-
-    // Остановка воспроизведения
-    function stopSpeechEdge() {
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio = null;
-      }
-      currentSpeakingStepId = null;
-    }
-
-    // Асинхронная генерация и воспроизведение речи через Edge-TTS
-    async function speakTextEdge(text) {
-      // Останавливаем предыдущее
-      stopSpeechEdge();
-
-      if (!text.trim() || typeof EdgeTTS === 'undefined') {
-        console.warn('Edge-TTS недоступен или текст пуст');
+    // ==================== НОВЫЕ ФУНКЦИИ ДЛЯ ОЗВУЧКИ ====================
+    // Озвучка текста через Web Speech API
+    function speakText(text) {
+      if (!window.speechSynthesis) {
+        console.warn("Браузер не поддерживает речевой синтез.");
         return;
       }
+      // Останавливаем текущую речь
+      window.speechSynthesis.cancel();
 
-      try {
-        const communicate = new EdgeTTS.Communicate(text, {
-          voice: 'ru-RU-DariyaNeural',  // естественный женский голос
-          rate: 0.9,
-          volume: 1.0
-        });
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ru-RU';
+      utterance.rate = 0.9;      // чуть медленнее
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
 
-        const audioChunks = [];
-        for await (const chunk of communicate.stream()) {
-          if (chunk.type === 'audio' && chunk.data) {
-            audioChunks.push(chunk.data);
-          }
-        }
+      // Можно выбрать русский голос, если он доступен (необязательно)
+      // const voices = window.speechSynthesis.getVoices();
+      // const russianVoice = voices.find(v => v.lang === 'ru-RU');
+      // if (russianVoice) utterance.voice = russianVoice;
 
-        if (audioChunks.length === 0) {
-          console.warn('Не удалось получить аудиоданные');
-          return;
-        }
-
-        const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-
-        // При окончании очищаем ссылку и сбрасываем состояние
-        audio.addEventListener('ended', () => {
-          URL.revokeObjectURL(audioUrl);
-          if (currentAudio === audio) {
-            currentAudio = null;
-            currentSpeakingStepId = null;
-          }
-        });
-
-        // При ошибке тоже очищаем
-        audio.addEventListener('error', () => {
-          URL.revokeObjectURL(audioUrl);
-          if (currentAudio === audio) {
-            currentAudio = null;
-            currentSpeakingStepId = null;
-          }
-        });
-
-        currentAudio = audio;
-        await audio.play();
-      } catch (err) {
-        console.error('Ошибка при озвучке через Edge-TTS:', err);
-        // Если Edge-TTS не сработал, можно включить fallback на Web Speech API, но пока просто игнорируем
-      }
+      window.speechSynthesis.speak(utterance);
     }
 
-    // Озвучить текущий шаг обучения (с toggle)
-    window.speakCurrentStep = function() {
-      const stepId = currentTopic + '_' + learningStep;
-
-      // Если уже озвучивается этот же шаг — останавливаем
-      if (currentSpeakingStepId === stepId) {
-        stopSpeechEdge();
-        return;
-      }
-
-      // Останавливаем любое другое воспроизведение
-      stopSpeechEdge();
-
-      // Собираем текст шага
+    // Озвучить текущий шаг обучения
+    function speakCurrentStep() {
       let steps;
       if (currentTopic === 'phone') steps = phoneSteps;
       else if (currentTopic === 'internet') steps = internetSteps;
       else steps = computerSteps;
-      const step = steps[learningStep];
-      const plainContent = step.content.replace(/<[^>]*>/g, ''); // удаляем HTML
-      const textToSpeak = step.title + '. ' + plainContent;
 
-      // Запоминаем, что озвучивается этот шаг
-      currentSpeakingStepId = stepId;
-      speakTextEdge(textToSpeak);
-    };
-    // =======================================================================
+      const step = steps[learningStep];
+      // Удаляем HTML-теги из содержимого
+      const plainContent = step.content.replace(/<[^>]*>/g, '');
+      const textToSpeak = step.title + '. ' + plainContent;
+      speakText(textToSpeak);
+    }
+
+    // Остановить речь (будем вызывать при смене экрана/шага)
+    function stopSpeech() {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    }
+    // ===================================================================
 
     // Рендер текущего экрана
     function renderScreen() {
@@ -536,6 +480,7 @@
       `;
     }
 
+    // ========== ЭКРАН ВЫБОРА ТЕМЫ ==========
     function renderTopicSelect() {
       return `
         <div class="min-h-screen w-full flex items-start justify-center pt-16">
@@ -630,10 +575,10 @@
       `;
     }
 
-    // ========== ОБНОВЛЁННЫЙ renderLearning с кнопкой озвучки ==========
+    // ========== ИСПРАВЛЕННЫЙ renderLearning с кнопкой озвучки ==========
     function renderLearning() {
       // Останавливаем речь при смене шага
-      stopSpeechEdge();
+      stopSpeech();
 
       let steps;
       if (currentTopic === 'phone') steps = phoneSteps;
@@ -660,7 +605,7 @@
               <!-- Кнопка-динамик (появляется при наведении) -->
               <button class="absolute top-4 right-4 p-3 bg-black/30 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-[#00FF94]/20 z-10" 
                       onclick="event.stopPropagation(); speakCurrentStep();"
-                      title="Озвучить / Остановить">
+                      title="Озвучить">
                 <i data-lucide="volume-2" class="w-5 h-5 text-white"></i>
               </button>
 
@@ -681,6 +626,7 @@
       `;
     }
 
+    // Остальные функции рендера (quiz, game, result) остаются без изменений
     function renderQuiz() {
       const q = quizState.questions[quizState.currentQuestion];
       const progress = ((quizState.currentQuestion + 1) / quizState.questions.length) * 100;
@@ -855,7 +801,7 @@
 
     // ========== НАВИГАЦИОННЫЕ ФУНКЦИИ (с остановкой речи) ==========
     window.navigateTo = function(screen) {
-      stopSpeechEdge();
+      stopSpeech();
       if (screen === 'quiz') {
         quizState.currentQuestion = 0;
         quizState.selectedAnswer = null;
@@ -875,13 +821,13 @@
     };
 
     window.goHome = function() {
-      stopSpeechEdge();
+      stopSpeech();
       currentScreen = 'home';
       renderScreen();
     };
 
     window.goBack = function() {
-      stopSpeechEdge();
+      stopSpeech();
       if (currentScreen === 'learning') {
         currentScreen = 'topicSelect';
         renderScreen();
@@ -891,7 +837,7 @@
     };
 
     window.startLearning = function(topic) {
-      stopSpeechEdge();
+      stopSpeech();
       currentTopic = topic;
       learningStep = 0;
       currentScreen = 'learning';
@@ -899,7 +845,7 @@
     };
 
     window.nextStep = function() {
-      stopSpeechEdge();
+      stopSpeech();
       let steps;
       if (currentTopic === 'phone') steps = phoneSteps;
       else if (currentTopic === 'internet') steps = internetSteps;
@@ -911,7 +857,7 @@
     };
 
     window.prevStep = function() {
-      stopSpeechEdge();
+      stopSpeech();
       if (learningStep > 0) {
         learningStep--;
         renderScreen();
@@ -919,7 +865,7 @@
     };
 
     window.finishLearning = function() {
-      stopSpeechEdge();
+      stopSpeech();
       currentScreen = 'topicSelect';
       renderScreen();
     };
@@ -946,7 +892,7 @@
     };
 
     window.restartQuiz = function() {
-      stopSpeechEdge();
+      stopSpeech();
       quizState.currentQuestion = 0;
       quizState.selectedAnswer = null;
       quizState.showExplanation = false;
@@ -976,7 +922,7 @@
     };
 
     window.restartGame = function() {
-      stopSpeechEdge();
+      stopSpeech();
       gameState.currentMessage = 0;
       gameState.selectedAnswer = null;
       gameState.showResult = false;
