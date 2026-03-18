@@ -727,4 +727,231 @@
         <div class="min-h-screen w-full pt-24 pb-12">
           <div class="w-full px-4 lg:px-8 max-w-4xl mx-auto">
             <div class="text-center mb-8">
-             
+              <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">Найди мошенника 🕵️</h1>
+              <p class="text-xl text-white/70">Тыкай на подозрительные места и реши — это обман или нет?</p>
+            </div>
+            <div class="mb-8">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-white/60">Сообщение ${gameState.currentMessage + 1} из ${gameState.messages.length}</span>
+                <span class="text-[#00FF94] font-semibold">Счёт: ${gameState.score}</span>
+              </div>
+              <div class="w-full bg-[#1a3150] rounded-full h-3">
+                <div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-3 rounded-full" style="width: ${((gameState.currentMessage + 1) / gameState.messages.length) * 100}%;"></div>
+              </div>
+            </div>
+            <div class="max-w-md mx-auto">
+              <div class="bg-[#1a3150] border-4 border-white/20 rounded-[2.5rem] p-4 shadow-2xl">
+                <div class="bg-[#0B1E33] rounded-t-3xl p-4 mb-2">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#00FF94] to-[#2D7EE7] flex items-center justify-center"><i data-lucide="smartphone" size="20" class="text-[#0B1E33]"></i></div>
+                    <div class="flex-1">
+                      <div class="text-white font-semibold">${msg.from}</div>
+                      ${msg.subject ? `<div class="text-white/60 text-sm">${msg.subject}</div>` : ''}
+                      <div class="text-white/40 text-xs">${msg.type === 'sms' ? 'SMS' : 'Email'}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-white/5 rounded-2xl p-6 min-h-[300px]">
+                  <p class="text-white whitespace-pre-line leading-relaxed">${msg.message}</p>
+                </div>
+              </div>
+            </div>
+            ${!gameState.showResult ? `
+              <div class="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+                <button class="px-8 py-4 bg-red-500/20 border-2 border-red-500 text-white rounded-xl font-semibold hover:bg-red-500/30 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="selectGameAnswer(true)"><i data-lucide="alert-triangle" size="20"></i>Это мошенники</button>
+                <button class="px-8 py-4 bg-[#00FF94]/20 border-2 border-[#00FF94] text-white rounded-xl font-semibold hover:bg-[#00FF94]/30 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="selectGameAnswer(false)"><i data-lucide="check-circle" size="20"></i>Всё нормально</button>
+              </div>
+            ` : ''}
+            ${gameState.showResult ? `
+              <div class="mt-8">
+                <div class="p-6 rounded-2xl border-2 ${(gameState.selectedAnswer === msg.isScam) ? 'bg-[#00FF94]/10 border-[#00FF94]' : 'bg-red-500/10 border-red-500'}">
+                  <div class="flex items-center gap-3 mb-4">
+                    ${(gameState.selectedAnswer === msg.isScam) ? '<i data-lucide="check-circle" class="text-[#00FF94]" size="32"></i>' : '<i data-lucide="x-circle" class="text-red-500" size="32"></i>'}
+                    <h3 class="text-2xl font-bold text-white">${(gameState.selectedAnswer === msg.isScam) ? 'Правильно!' : 'Неправильно!'}</h3>
+                  </div>
+                  <p class="text-white/80 mb-4 leading-relaxed">${msg.explanation}</p>
+                  ${msg.isScam && msg.redFlags.length > 0 ? `
+                    <div class="mt-4 p-4 bg-[#0B1E33] rounded-xl">
+                      <h4 class="text-[#00FF94] font-semibold mb-2 flex items-center gap-2"><i data-lucide="alert-triangle" size="18"></i>Красные флаги:</h4>
+                      <ul class="space-y-1">${msg.redFlags.map(f => `<li class="text-white/70 text-sm flex items-start gap-2"><span class="text-red-500 mt-1">•</span><span>${f}</span></li>`).join('')}</ul>
+                    </div>
+                  ` : ''}
+                  <button class="mt-6 w-full px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105" onclick="nextGameMessage()">${gameState.currentMessage < gameState.messages.length - 1 ? 'Следующее сообщение' : 'Завершить'}</button>
+                </div>
+              </div>
+            ` : ''}
+            <div class="flex justify-center mt-8">
+              ${getMascotSVG(gameState.showResult ? (gameState.selectedAnswer === msg.isScam ? 'happy' : 'thinking') : 'winking', 'w-32 h-32')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderGameResult() {
+      const percent = (gameState.score / gameState.messages.length) * 100;
+      return `
+        <div class="min-h-screen w-full pt-24 pb-12">
+          <div class="w-full px-4 lg:px-8 max-w-2xl mx-auto text-center">
+            ${getMascotSVG('happy', 'w-40 h-40 mx-auto mb-8')}
+            <div class="bg-[#1a3150] border border-white/10 rounded-3xl p-8 lg:p-12 mb-8">
+              <i data-lucide="alert-triangle" class="w-20 h-20 text-[#00FF94] mx-auto mb-6"></i>
+              <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">Детектив завершён!</h1>
+              <div class="text-6xl font-bold bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] bg-clip-text text-transparent mb-4">${gameState.score} / ${gameState.messages.length}</div>
+              <p class="text-xl text-white/80 mb-8">${percent === 100 ? 'Идеально! Ты — настоящий детектив мошенничества! 🕵️' : percent >= 75 ? 'Отлично! Мошенникам будет сложно тебя обмануть! 🌟' : percent >= 50 ? 'Хорошо! Но будь внимательнее! 👀' : 'Нужно быть осторожнее! Пройди ещё раз! 🔄'}</p>
+              <div class="w-full bg-[#0B1E33] rounded-full h-4 mb-8">
+                <div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-4 rounded-full" style="width: ${percent}%;"></div>
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="restartGame()"><i data-lucide="rotate-ccw" size="20"></i>Пройти снова</button>
+              <button class="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 hover:border-[#00FF94]/50 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="goHome()"><i data-lucide="home" size="20"></i>На главную</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ========== НАВИГАЦИОННЫЕ ФУНКЦИИ (с остановкой речи) ==========
+    window.navigateTo = function(screen) {
+      stopSpeech();
+      if (screen === 'quiz') {
+        quizState.currentQuestion = 0;
+        quizState.selectedAnswer = null;
+        quizState.showExplanation = false;
+        quizState.score = 0;
+        currentScreen = 'quiz';
+      } else if (screen === 'game') {
+        gameState.currentMessage = 0;
+        gameState.selectedAnswer = null;
+        gameState.showResult = false;
+        gameState.score = 0;
+        currentScreen = 'game';
+      } else {
+        currentScreen = screen;
+      }
+      renderScreen();
+    };
+
+    window.goHome = function() {
+      stopSpeech();
+      currentScreen = 'home';
+      renderScreen();
+    };
+
+    window.goBack = function() {
+      stopSpeech();
+      if (currentScreen === 'learning') {
+        currentScreen = 'topicSelect';
+        renderScreen();
+      } else {
+        goHome();
+      }
+    };
+
+    window.startLearning = function(topic) {
+      stopSpeech();
+      currentTopic = topic;
+      learningStep = 0;
+      currentScreen = 'learning';
+      renderScreen();
+    };
+
+    window.nextStep = function() {
+      stopSpeech();
+      let steps;
+      if (currentTopic === 'phone') steps = phoneSteps;
+      else if (currentTopic === 'internet') steps = internetSteps;
+      else steps = computerSteps;
+      if (learningStep < steps.length - 1) {
+        learningStep++;
+        renderScreen();
+      }
+    };
+
+    window.prevStep = function() {
+      stopSpeech();
+      if (learningStep > 0) {
+        learningStep--;
+        renderScreen();
+      }
+    };
+
+    window.finishLearning = function() {
+      stopSpeech();
+      currentScreen = 'topicSelect';
+      renderScreen();
+    };
+
+    window.selectQuizAnswer = function(idx) {
+      if (quizState.selectedAnswer !== null) return;
+      quizState.selectedAnswer = idx;
+      quizState.showExplanation = true;
+      if (idx === quizState.questions[quizState.currentQuestion].correct) {
+        quizState.score++;
+      }
+      renderScreen();
+    };
+
+    window.nextQuizQuestion = function() {
+      if (quizState.currentQuestion < quizState.questions.length - 1) {
+        quizState.currentQuestion++;
+        quizState.selectedAnswer = null;
+        quizState.showExplanation = false;
+      } else {
+        quizState.currentQuestion = quizState.questions.length;
+      }
+      renderScreen();
+    };
+
+    window.restartQuiz = function() {
+      stopSpeech();
+      quizState.currentQuestion = 0;
+      quizState.selectedAnswer = null;
+      quizState.showExplanation = false;
+      quizState.score = 0;
+      renderScreen();
+    };
+
+    window.selectGameAnswer = function(isScam) {
+      if (gameState.selectedAnswer !== null) return;
+      gameState.selectedAnswer = isScam;
+      gameState.showResult = true;
+      if (isScam === gameState.messages[gameState.currentMessage].isScam) {
+        gameState.score++;
+      }
+      renderScreen();
+    };
+
+    window.nextGameMessage = function() {
+      if (gameState.currentMessage < gameState.messages.length - 1) {
+        gameState.currentMessage++;
+        gameState.selectedAnswer = null;
+        gameState.showResult = false;
+      } else {
+        gameState.currentMessage = gameState.messages.length;
+      }
+      renderScreen();
+    };
+
+    window.restartGame = function() {
+      stopSpeech();
+      gameState.currentMessage = 0;
+      gameState.selectedAnswer = null;
+      gameState.showResult = false;
+      gameState.score = 0;
+      renderScreen();
+    };
+
+    // Обработчики UI
+    document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+      const nav = document.getElementById('mobileNav');
+      nav.classList.toggle('hidden');
+    });
+
+    document.getElementById('logo').addEventListener('click', goHome);
+
+    renderScreen();
+  </script>
+</body>
+</html>
