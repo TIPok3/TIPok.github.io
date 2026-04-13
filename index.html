@@ -383,7 +383,7 @@
       return `<div class="min-h-screen w-full flex items-start justify-center pt-16"><div class="w-full px-4 lg:px-8 max-w-6xl mx-auto"><h2 class="text-4xl lg:text-5xl font-bold text-white text-center mb-10">Что будем проверять?</h2><div class="flex flex-col md:flex-row items-center justify-center gap-8"><div class="topic-card"><div class="w-40 h-40 topic-figure relative"><svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl relative z-10"><defs><linearGradient id="gradBulb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs><ellipse cx="60" cy="55" rx="25" ry="32" fill="url(#gradBulb)" stroke="#0B1E33" stroke-width="3"/><rect x="52" y="82" width="16" height="15" rx="4" fill="#2D7EE7" stroke="#0B1E33" stroke-width="2"/><line x1="60" y1="82" x2="60" y2="72" stroke="#0B1E33" stroke-width="2"/><path class="bulb-filament" d="M50 45 Q60 35 70 45" stroke="#666" stroke-width="3" fill="none"/></svg><div class="bulb-glow absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-all duration-300" style="background: radial-gradient(circle at center, rgba(255,215,0,0.6) 0%, rgba(255,215,0,0) 70%); filter: blur(12px);"></div></div><button class="topic-button" onclick="navigateTo('quiz')">Квиз</button></div><div class="topic-card"><div class="w-40 h-40 topic-figure"><svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl"><defs><linearGradient id="gradMask" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs><path d="M30 30 Q60 15 90 30 L90 75 Q60 95 30 75 Z" fill="#1a2a3a" stroke="#0B1E33" stroke-width="3"/><ellipse cx="45" cy="55" rx="10" ry="7" fill="white" stroke="#0B1E33" stroke-width="2"/><ellipse cx="75" cy="55" rx="10" ry="7" fill="white" stroke="#0B1E33" stroke-width="2"/><circle cx="42" cy="53" r="4" fill="#0B1E33"/><circle cx="78" cy="53" r="4" fill="#0B1E33"/><circle cx="25" cy="90" r="18" fill="none" stroke="#0B1E33" stroke-width="4"/><line x1="15" y1="80" x2="35" y2="100" stroke="#0B1E33" stroke-width="2"/><line x1="35" y1="80" x2="15" y2="100" stroke="#0B1E33" stroke-width="2"/><path d="M38 102 Q45 110 55 108" stroke="#0B1E33" stroke-width="5" fill="none" stroke-linecap="round"/></svg></div><button class="topic-button" onclick="navigateTo('game')">Найди мошенника</button></div></div></div></div>`;
     }
 
-    // Обновлённый renderLearning с виджетами, карточка строго по центру
+    // Обновлённый renderLearning с привязкой виджетов к конкретным карточкам
     function renderLearning() {
       stopSpeech();
       let steps;
@@ -392,24 +392,23 @@
       else steps = computerSteps;
       const step = steps[learningStep];
       const isLast = learningStep === steps.length - 1;
-    
+
       let showPinWidget = false;
       let showPermWidget = false;
       let showPasswordWidget = false;
-    
+
       if (currentTopic === 'phone') {
-        if (learningStep === 1) showPinWidget = true;
-        if (learningStep === 5) showPermWidget = true;
+        if (learningStep === 1) showPinWidget = true;        // PIN-код SIM-карты
+        if (learningStep === 5) showPermWidget = true;       // Разрешения приложений
       }
-      if (currentTopic === 'internet' && learningStep === 8) showPasswordWidget = true;
-      if (currentTopic === 'computer' && learningStep === 3) showPasswordWidget = true;
-    
+      if (currentTopic === 'internet' && learningStep === 8) showPasswordWidget = true;  // Пароли
+      if (currentTopic === 'computer' && learningStep === 3) showPasswordWidget = true;  // Пароль для учётной записи
+
       const showLeftWidgets = showPinWidget || showPermWidget || showPasswordWidget;
-    
+
       return `
         <div class="min-h-screen w-full pt-4 pb-12">
-          <div class="w-full px-4 lg:px-8 max-w-7xl mx-auto relative">
-            <!-- Прогресс-бар -->
+          <div class="w-full px-4 lg:px-8 max-w-7xl mx-auto">
             <div class="text-center mb-6">
               <div class="flex justify-between items-center text-white/60 text-sm mb-2">
                 <span>Шаг ${learningStep + 1} из ${steps.length}</span>
@@ -419,31 +418,10 @@
                 <div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-2 rounded-full" style="width: ${((learningStep + 1) / steps.length) * 100}%;"></div>
               </div>
             </div>
-    
-            <!-- Карточка по центру (как была изначально) -->
-            <div class="max-w-3xl mx-auto">
-              <div class="bg-[#1a3150] border border-white/10 rounded-3xl p-6 lg:p-8 relative group">
-                <button class="absolute top-4 right-4 p-3 bg-black/30 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-[#00FF94]/20 z-10" onclick="event.stopPropagation(); speakCurrentStep();" title="Озвучить / Остановить">
-                  <i data-lucide="volume-2" class="w-5 h-5 text-white"></i>
-                </button>
-                <div class="flex flex-col items-center text-center">
-                  <div class="p-3 gradient-bg rounded-xl mb-4">
-                    <i data-lucide="${step.icon}" class="w-12 h-12 text-[#00FF94]"></i>
-                  </div>
-                  <h3 class="text-2xl lg:text-3xl font-bold text-[#00FF94] mb-4">${step.title}</h3>
-                  <div class="text-white/90 text-base leading-relaxed text-left">${step.content}</div>
-                </div>
-              </div>
-              <div class="flex justify-center gap-4 mt-6">
-                ${learningStep > 0 ? `<button class="px-8 py-4 bg-white/10 border border-white/20 rounded-xl text-lg font-semibold text-white hover:bg-[#2D7EE7] transition-all" onclick="prevStep()"><i data-lucide="arrow-left" class="inline mr-2"></i>Назад</button>` : ''}
-                ${!isLast ? `<button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-lg font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="nextStep()">Далее <i data-lucide="arrow-right" class="inline ml-2"></i></button>` : `<button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-lg font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="finishLearning()">Завершить</button>`}
-              </div>
-            </div>
-    
-            <!-- Виджеты (абсолютно слева, не влияют на карточку) -->
-            ${showLeftWidgets ? `
-            <div class="hidden lg:block absolute left-0 top-1/2 transform -translate-y-1/2" style="left: 0; transform: translateY(-50%); width: 280px; margin-left: -300px;">
-              <div class="space-y-6">
+
+            <div class="flex flex-col lg:flex-row gap-6 items-start">
+              ${showLeftWidgets ? `
+              <div class="hidden lg:block w-80 shrink-0 sticky top-24 space-y-6">
                 ${showPinWidget ? `
                 <div class="bg-[#1a3150] border border-white/10 rounded-2xl p-4">
                   <h3 class="text-[#00FF94] font-bold text-lg mb-3">📱 Проверка PIN-кода</h3>
@@ -481,15 +459,32 @@
                 </div>
                 ` : ''}
               </div>
+              ` : `<div class="hidden lg:block w-80 shrink-0"></div>`}
+
+              <div class="flex-1 max-w-3xl mx-auto lg:mx-0">
+                <div class="bg-[#1a3150] border border-white/10 rounded-3xl p-6 lg:p-8 relative group">
+                  <button class="absolute top-4 right-4 p-3 bg-black/30 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-[#00FF94]/20 z-10" onclick="event.stopPropagation(); speakCurrentStep();" title="Озвучить / Остановить">
+                    <i data-lucide="volume-2" class="w-5 h-5 text-white"></i>
+                  </button>
+                  <div class="flex flex-col items-center text-center">
+                    <div class="p-3 gradient-bg rounded-xl mb-4">
+                      <i data-lucide="${step.icon}" class="w-12 h-12 text-[#00FF94]"></i>
+                    </div>
+                    <h3 class="text-2xl lg:text-3xl font-bold text-[#00FF94] mb-4">${step.title}</h3>
+                    <div class="text-white/90 text-base leading-relaxed text-left">${step.content}</div>
+                  </div>
+                </div>
+                <div class="flex justify-center gap-4 mt-6">
+                  ${learningStep > 0 ? `<button class="px-8 py-4 bg-white/10 border border-white/20 rounded-xl text-lg font-semibold text-white hover:bg-[#2D7EE7] transition-all" onclick="prevStep()"><i data-lucide="arrow-left" class="inline mr-2"></i>Назад</button>` : ''}
+                  ${!isLast ? `<button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-lg font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="nextStep()">Далее <i data-lucide="arrow-right" class="inline ml-2"></i></button>` : `<button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-lg font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="finishLearning()">Завершить</button>`}
+                </div>
+              </div>
+
+              <div class="hidden lg:block w-48 shrink-0 sticky top-24">
+                ${getMascotSVG('pointing', 'w-48 h-48 mx-auto')}
+              </div>
             </div>
-            ` : ''}
-    
-            <!-- Маскот (абсолютно справа, как раньше) -->
-            <div class="hidden lg:block absolute right-0 top-1/2 transform -translate-y-1/2" style="right: 0; transform: translateY(-50%); width: 180px; margin-right: -200px;">
-              ${getMascotSVG('pointing', 'w-48 h-48 mx-auto')}
-            </div>
-    
-            <!-- Мобильная версия: виджеты под карточкой -->
+
             ${showLeftWidgets ? `
             <div class="lg:hidden mt-8 space-y-6">
               ${showPinWidget ? `
@@ -622,7 +617,7 @@
       }
     }
 
-    // Остальные функции (квиз, игра) остаются без изменений
+    // Остальные функции рендеринга (квиз, игра) без изменений
     function renderQuiz() {
       const q = quizState.questions[quizState.currentQuestion];
       const progress = ((quizState.currentQuestion + 1) / quizState.questions.length) * 100;
