@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <title>КиберЩит — защити себя</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M60 10 L90 25 L90 55 Q90 85 60 110 Q30 85 30 55 L30 25 Z' fill='%2300FF94' stroke='%230B1E33' stroke-width='3'/%3E%3Ccircle cx='48' cy='48' r='5' fill='%230B1E33'/%3E%3Ccircle cx='72' cy='48' r='5' fill='%230B1E33'/%3E%3Cpath d='M45 62 Q60 72 75 62' stroke='%230B1E33' stroke-width='3' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -318,6 +320,7 @@
       messages: []
     };
 
+    // Загрузка данных из data.json
     async function loadData() {
       try {
         const response = await fetch('data.json');
@@ -327,13 +330,16 @@
         computerSteps = data.computerSteps;
         quizState.questions = data.quizQuestions;
         gameState.messages = data.gameMessages;
+        // Инициализируем первый рендер после загрузки
         renderScreen();
       } catch (e) {
         console.error('Ошибка загрузки данных:', e);
+        // Если файл не найден, показываем заглушку
         alert('Не удалось загрузить данные. Проверьте наличие файла data.json.');
       }
     }
 
+    // Функция маскота (полная копия из вашего кода)
     function getMascotSVG(variant = 'happy', className = 'w-20 h-20') {
       let mouthPath, pointingFinger = '';
       if (variant === 'thinking') mouthPath = '<path d="M45 65 Q60 68 75 65" stroke="#0B1E33" stroke-width="3" stroke-linecap="round" fill="none"/>';
@@ -347,6 +353,7 @@
       return '<svg width="120" height="120" viewBox="-5 -5 130 130" class="mascot-container mascot-glow ' + className + '"><path d="M60 10 L90 25 L90 55 Q90 85 60 110 Q30 85 30 55 L30 25 Z" fill="#00FF94" stroke="#0B1E33" stroke-width="3"/><path d="M60 20 L80 30 L80 52 Q80 75 60 95 Q40 75 40 52 L40 30 Z" fill="#0B1E33" opacity="0.3"/>' + leftEye + rightEye + mouthPath + '<g transform="translate(60,70)"><rect x="-8" y="-3" width="16" height="12" rx="2" fill="#2D7EE7" /><path d="M -5 -3 L -5 -8 Q -5 -12 0 -12 Q 5 -12 5 -8 L 5 -3" fill="none" stroke="#2D7EE7" stroke-width="3" stroke-linecap="round"/><circle cx="0" cy="2" r="2" fill="#0B1E33" /></g>' + pointingFinger + '<g class="mascot-antenna"><line x1="50" y1="10" x2="50" y2="2" stroke="#2D7EE7" stroke-width="2" /><circle cx="50" cy="2" r="3" fill="#2D7EE7" /><line x1="70" y1="10" x2="70" y2="2" stroke="#2D7EE7" stroke-width="2" /><circle cx="70" cy="2" r="3" fill="#2D7EE7" /></g></svg>';
     }
 
+    // Озвучка
     let currentSpeakingStepId = null;
     function speakText(text) {
       if (!window.speechSynthesis) { console.warn("Браузер не поддерживает речевой синтез."); return; }
@@ -371,265 +378,32 @@
       speakText(textToSpeak);
     };
 
+    // Рендеринг всех экранов
     function renderHome() {
       return `<div class="min-h-screen w-full flex items-center justify-center"><div class="w-full px-4 lg:px-8 max-w-6xl mx-auto"><div class="grid lg:grid-cols-2 gap-12 items-center"><div class="text-center lg:text-left"><h1 class="text-5xl lg:text-7xl font-bold mb-6 py-2"><span class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] bg-clip-text text-transparent">Проверь свою киберсилу! </span><span>🔥</span></h1><p class="text-xl lg:text-2xl text-white/80 mb-8 leading-relaxed">Всего 30 минут — и ты научишься защищать телефон, компьютер и личные данные от мошенников. Играй и узнавай!</p><div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"><button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105" onclick="navigateTo('topicSelect')">Пройти обучение</button><button class="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold text-lg border border-white/20 hover:bg-white/20 hover:border-[#00FF94]/50 transition-all hover:scale-105" onclick="navigateTo('checkSelect')">Проверить знания</button></div></div><div class="flex justify-center"><div class="relative">${getMascotSVG('pointing', 'w-64 h-64 lg:w-96 lg:h-96')}<div class="absolute -z-10 inset-0 bg-gradient-to-br from-[#00FF94]/30 to-[#2D7EE7]/30 blur-3xl animate-pulse"></div></div></div></div></div></div>`;
     }
-
     function renderTopicSelect() {
       return `<div class="min-h-screen w-full flex items-start justify-center pt-16"><div class="w-full px-4 lg:px-8 max-w-6xl mx-auto"><h2 class="text-4xl lg:text-5xl font-bold text-white text-center mb-10">Выбери тему для обучения</h2><div class="flex flex-col md:flex-row items-center justify-center gap-8"><div class="topic-card"><div class="w-40 h-40 topic-figure"><svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl"><defs><linearGradient id="gradPhone" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs><rect x="25" y="5" width="70" height="105" rx="12" fill="url(#gradPhone)" stroke="#0B1E33" stroke-width="3"/><rect x="35" y="18" width="50" height="80" rx="5" fill="#0B1E33" opacity="0.8"/><rect x="40" y="12" width="40" height="3" rx="1.5" fill="#2D7EE7" stroke="#0B1E33" stroke-width="1"/><circle cx="60" cy="23" r="2" fill="#00FF94" stroke="#0B1E33" stroke-width="1"/><circle cx="60" cy="103" r="3" fill="#2D7EE7" stroke="#0B1E33" stroke-width="2"/></svg></div><button class="topic-button" onclick="startLearning('phone')">Телефон</button></div><div class="topic-card"><div class="w-40 h-40 topic-figure"><svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl"><defs><linearGradient id="gradGlobe" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs><circle cx="60" cy="60" r="35" fill="url(#gradGlobe)" stroke="#0B1E33" stroke-width="3"/><ellipse cx="60" cy="60" rx="40" ry="15" fill="none" stroke="#0B1E33" stroke-width="3"/><ellipse cx="60" cy="60" rx="15" ry="40" fill="none" stroke="#0B1E33" stroke-width="3"/><circle cx="50" cy="50" r="6" fill="#2D7EE7" opacity="0.8"/><circle cx="70" cy="70" r="6" fill="#2D7EE7" opacity="0.8"/><circle cx="45" cy="75" r="5" fill="#2D7EE7" opacity="0.8"/><ellipse cx="60" cy="60" rx="45" ry="20" fill="none" stroke="#2D7EE7" stroke-width="2" stroke-dasharray="4 4"/><circle cx="100" cy="50" r="4" fill="#00FF94" stroke="#0B1E33" stroke-width="2"/><circle cx="20" cy="20" r="2" fill="white"/><circle cx="100" cy="20" r="2" fill="white"/><circle cx="20" cy="100" r="2" fill="white"/></svg></div><button class="topic-button" onclick="startLearning('internet')">Интернет</button></div><div class="topic-card"><div class="w-40 h-40 topic-figure"><svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl"><defs><linearGradient id="gradMonitor" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs><rect x="10" y="10" width="95" height="70" rx="8" fill="url(#gradMonitor)" stroke="#0B1E33" stroke-width="3"/><rect x="20" y="20" width="75" height="50" rx="4" fill="#0B1E33" opacity="0.8"/><circle cx="35" cy="35" r="4" fill="#00FF94"/><circle cx="55" cy="35" r="4" fill="#2D7EE7"/><circle cx="75" cy="35" r="4" fill="#00FF94"/><rect x="35" y="50" width="40" height="4" rx="2" fill="#2D7EE7" opacity="0.8"/><rect x="40" y="85" width="35" height="8" rx="3" fill="#2D7EE7" stroke="#0B1E33" stroke-width="2"/><rect x="30" y="93" width="55" height="5" rx="2.5" fill="#2D7EE7" stroke="#0B1E33" stroke-width="2"/><rect x="15" y="100" width="85" height="8" rx="3" fill="#2D7EE7" stroke="#0B1E33" stroke-width="2"/><circle cx="100" cy="104" r="6" fill="#00FF94" stroke="#0B1E33" stroke-width="2"/></svg></div><button class="topic-button" onclick="startLearning('computer')">Компьютер</button></div></div></div></div>`;
     }
-
     function renderCheckSelect() {
       return `<div class="min-h-screen w-full flex items-start justify-center pt-16"><div class="w-full px-4 lg:px-8 max-w-6xl mx-auto"><h2 class="text-4xl lg:text-5xl font-bold text-white text-center mb-10">Что будем проверять?</h2><div class="flex flex-col md:flex-row items-center justify-center gap-8"><div class="topic-card"><div class="w-40 h-40 topic-figure relative"><svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl relative z-10"><defs><linearGradient id="gradBulb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs><ellipse cx="60" cy="55" rx="25" ry="32" fill="url(#gradBulb)" stroke="#0B1E33" stroke-width="3"/><rect x="52" y="82" width="16" height="15" rx="4" fill="#2D7EE7" stroke="#0B1E33" stroke-width="2"/><line x1="60" y1="82" x2="60" y2="72" stroke="#0B1E33" stroke-width="2"/><path class="bulb-filament" d="M50 45 Q60 35 70 45" stroke="#666" stroke-width="3" fill="none"/></svg><div class="bulb-glow absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-all duration-300" style="background: radial-gradient(circle at center, rgba(255,215,0,0.6) 0%, rgba(255,215,0,0) 70%); filter: blur(12px);"></div></div><button class="topic-button" onclick="navigateTo('quiz')">Квиз</button></div><div class="topic-card"><div class="w-40 h-40 topic-figure"><svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl"><defs><linearGradient id="gradMask" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs><path d="M30 30 Q60 15 90 30 L90 75 Q60 95 30 75 Z" fill="#1a2a3a" stroke="#0B1E33" stroke-width="3"/><ellipse cx="45" cy="55" rx="10" ry="7" fill="white" stroke="#0B1E33" stroke-width="2"/><ellipse cx="75" cy="55" rx="10" ry="7" fill="white" stroke="#0B1E33" stroke-width="2"/><circle cx="42" cy="53" r="4" fill="#0B1E33"/><circle cx="78" cy="53" r="4" fill="#0B1E33"/><circle cx="25" cy="90" r="18" fill="none" stroke="#0B1E33" stroke-width="4"/><line x1="15" y1="80" x2="35" y2="100" stroke="#0B1E33" stroke-width="2"/><line x1="35" y1="80" x2="15" y2="100" stroke="#0B1E33" stroke-width="2"/><path d="M38 102 Q45 110 55 108" stroke="#0B1E33" stroke-width="5" fill="none" stroke-linecap="round"/></svg></div><button class="topic-button" onclick="navigateTo('game')">Найди мошенника</button></div></div></div></div>`;
     }
-
-    // Обновлённый renderLearning с привязкой виджетов к конкретным карточкам
     function renderLearning() {
       stopSpeech();
-      let steps;
-      if (currentTopic === 'phone') steps = phoneSteps;
-      else if (currentTopic === 'internet') steps = internetSteps;
-      else steps = computerSteps;
-      const step = steps[learningStep];
-      const isLast = learningStep === steps.length - 1;
-
-      let showPinWidget = false;
-      let showPermWidget = false;
-      let showPasswordWidget = false;
-
-      if (currentTopic === 'phone') {
-        if (learningStep === 1) showPinWidget = true;        // PIN-код SIM-карты
-        if (learningStep === 5) showPermWidget = true;       // Разрешения приложений
-      }
-      if (currentTopic === 'internet' && learningStep === 8) showPasswordWidget = true;  // Пароли
-      if (currentTopic === 'computer' && learningStep === 3) showPasswordWidget = true;  // Пароль для учётной записи
-
-      const showLeftWidgets = showPinWidget || showPermWidget || showPasswordWidget;
-
-      return `
-        <div class="min-h-screen w-full pt-4 pb-12">
-          <div class="w-full px-4 lg:px-8 max-w-7xl mx-auto">
-            <div class="text-center mb-6">
-              <div class="flex justify-between items-center text-white/60 text-sm mb-2">
-                <span>Шаг ${learningStep + 1} из ${steps.length}</span>
-                <button class="hover:text-[#00FF94]" onclick="goBack()">← Назад</button>
-              </div>
-              <div class="w-full bg-[#1a3150] rounded-full h-2">
-                <div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-2 rounded-full" style="width: ${((learningStep + 1) / steps.length) * 100}%;"></div>
-              </div>
-            </div>
-
-            <div class="flex flex-col lg:flex-row gap-6 items-start">
-              ${showLeftWidgets ? `
-              <div class="hidden lg:block w-80 shrink-0 sticky top-24 space-y-6">
-                ${showPinWidget ? `
-                <div class="bg-[#1a3150] border border-white/10 rounded-2xl p-4">
-                  <h3 class="text-[#00FF94] font-bold text-lg mb-3">📱 Проверка PIN-кода</h3>
-                  <input type="number" id="widgetPinInput" placeholder="Введите PIN (4-8 цифр)" class="w-full p-2 rounded bg-white/10 text-white mb-2">
-                  <div id="widgetPinResult" class="text-sm"></div>
-                </div>
-                ` : ''}
-                ${showPermWidget ? `
-                <div class="bg-[#1a3150] border border-white/10 rounded-2xl p-4">
-                  <h3 class="text-[#00FF94] font-bold text-lg mb-3">⚠️ Разрешения приложений</h3>
-                  <select id="widgetAppSelect" class="w-full p-2 rounded bg-white/10 text-white mb-2">
-                    <option value="flashlight">Фонарик</option>
-                    <option value="calculator">Калькулятор</option>
-                    <option value="game">Игра</option>
-                  </select>
-                  <select id="widgetPermSelect" class="w-full p-2 rounded bg-white/10 text-white mb-2">
-                    <option value="contacts">Доступ к контактам</option>
-                    <option value="camera">Доступ к камере</option>
-                    <option value="sms">Доступ к SMS</option>
-                    <option value="location">Доступ к геолокации</option>
-                  </select>
-                  <button id="widgetCheckPerm" class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] font-semibold px-3 py-1 rounded-full text-sm w-full">Проверить</button>
-                  <div id="widgetPermResult" class="mt-2 text-sm"></div>
-                </div>
-                ` : ''}
-                ${showPasswordWidget ? `
-                <div class="bg-[#1a3150] border border-white/10 rounded-2xl p-4">
-                  <h3 class="text-[#00FF94] font-bold text-lg mb-3">🔐 Генератор паролей</h3>
-                  <input type="text" id="widgetPasswordOutput" readonly class="w-full p-2 rounded bg-white/10 text-white mb-2">
-                  <div class="flex gap-2">
-                    <button id="widgetGeneratePassword" class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] font-semibold px-3 py-1 rounded-full text-sm">Сгенерировать</button>
-                    <button id="widgetCopyPassword" class="bg-white/10 text-white px-3 py-1 rounded-full text-sm">Копировать</button>
-                  </div>
-                  <div class="mt-2 text-xs text-white/50">Длина 12-16 символов, буквы+цифры+символы</div>
-                </div>
-                ` : ''}
-              </div>
-              ` : `<div class="hidden lg:block w-80 shrink-0"></div>`}
-
-              <div class="flex-1 max-w-3xl mx-auto lg:mx-0">
-                <div class="bg-[#1a3150] border border-white/10 rounded-3xl p-6 lg:p-8 relative group">
-                  <button class="absolute top-4 right-4 p-3 bg-black/30 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-[#00FF94]/20 z-10" onclick="event.stopPropagation(); speakCurrentStep();" title="Озвучить / Остановить">
-                    <i data-lucide="volume-2" class="w-5 h-5 text-white"></i>
-                  </button>
-                  <div class="flex flex-col items-center text-center">
-                    <div class="p-3 gradient-bg rounded-xl mb-4">
-                      <i data-lucide="${step.icon}" class="w-12 h-12 text-[#00FF94]"></i>
-                    </div>
-                    <h3 class="text-2xl lg:text-3xl font-bold text-[#00FF94] mb-4">${step.title}</h3>
-                    <div class="text-white/90 text-base leading-relaxed text-left">${step.content}</div>
-                  </div>
-                </div>
-                <div class="flex justify-center gap-4 mt-6">
-                  ${learningStep > 0 ? `<button class="px-8 py-4 bg-white/10 border border-white/20 rounded-xl text-lg font-semibold text-white hover:bg-[#2D7EE7] transition-all" onclick="prevStep()"><i data-lucide="arrow-left" class="inline mr-2"></i>Назад</button>` : ''}
-                  ${!isLast ? `<button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-lg font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="nextStep()">Далее <i data-lucide="arrow-right" class="inline ml-2"></i></button>` : `<button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-lg font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="finishLearning()">Завершить</button>`}
-                </div>
-              </div>
-
-              <div class="hidden lg:block w-48 shrink-0 sticky top-24">
-                ${getMascotSVG('pointing', 'w-48 h-48 mx-auto')}
-              </div>
-            </div>
-
-            ${showLeftWidgets ? `
-            <div class="lg:hidden mt-8 space-y-6">
-              ${showPinWidget ? `
-              <div class="bg-[#1a3150] border border-white/10 rounded-2xl p-4">
-                <h3 class="text-[#00FF94] font-bold text-lg mb-3">📱 Проверка PIN-кода</h3>
-                <input type="number" id="mobileWidgetPinInput" placeholder="Введите PIN (4-8 цифр)" class="w-full p-2 rounded bg-white/10 text-white mb-2">
-                <div id="mobileWidgetPinResult" class="text-sm"></div>
-              </div>
-              ` : ''}
-              ${showPermWidget ? `
-              <div class="bg-[#1a3150] border border-white/10 rounded-2xl p-4">
-                <h3 class="text-[#00FF94] font-bold text-lg mb-3">⚠️ Разрешения приложений</h3>
-                <select id="mobileWidgetAppSelect" class="w-full p-2 rounded bg-white/10 text-white mb-2">
-                  <option value="flashlight">Фонарик</option>
-                  <option value="calculator">Калькулятор</option>
-                  <option value="game">Игра</option>
-                </select>
-                <select id="mobileWidgetPermSelect" class="w-full p-2 rounded bg-white/10 text-white mb-2">
-                  <option value="contacts">Доступ к контактам</option>
-                  <option value="camera">Доступ к камере</option>
-                  <option value="sms">Доступ к SMS</option>
-                  <option value="location">Доступ к геолокации</option>
-                </select>
-                <button id="mobileWidgetCheckPerm" class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] font-semibold px-3 py-1 rounded-full text-sm w-full">Проверить</button>
-                <div id="mobileWidgetPermResult" class="mt-2 text-sm"></div>
-              </div>
-              ` : ''}
-              ${showPasswordWidget ? `
-              <div class="bg-[#1a3150] border border-white/10 rounded-2xl p-4">
-                <h3 class="text-[#00FF94] font-bold text-lg mb-3">🔐 Генератор паролей</h3>
-                <input type="text" id="mobileWidgetPasswordOutput" readonly class="w-full p-2 rounded bg-white/10 text-white mb-2">
-                <div class="flex gap-2">
-                  <button id="mobileWidgetGeneratePassword" class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] font-semibold px-3 py-1 rounded-full text-sm">Сгенерировать</button>
-                  <button id="mobileWidgetCopyPassword" class="bg-white/10 text-white px-3 py-1 rounded-full text-sm">Копировать</button>
-                </div>
-              </div>
-              ` : ''}
-            </div>
-            ` : ''}
-          </div>
-        </div>
-      `;
+      let steps; if (currentTopic === 'phone') steps = phoneSteps; else if (currentTopic === 'internet') steps = internetSteps; else steps = computerSteps;
+      const step = steps[learningStep]; const isLast = learningStep === steps.length - 1;
+      return `<div class="min-h-screen w-full flex items-start justify-center pt-4"><div class="w-full px-4 lg:px-8 max-w-3xl mx-auto"><div class="text-center mb-4"><div class="flex justify-between items-center text-white/60 text-sm mb-2"><span>Шаг ${learningStep + 1} из ${steps.length}</span><button class="hover:text-[#00FF94]" onclick="goBack()">← Назад</button></div><div class="w-full bg-[#1a3150] rounded-full h-2 mb-4"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-2 rounded-full" style="width: ${((learningStep + 1) / steps.length) * 100}%;"></div></div></div><div class="bg-[#1a3150] border border-white/10 rounded-3xl p-6 lg:p-8 mb-6 relative group"><button class="absolute top-4 right-4 p-3 bg-black/30 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-[#00FF94]/20 z-10" onclick="event.stopPropagation(); speakCurrentStep();" title="Озвучить / Остановить"><i data-lucide="volume-2" class="w-5 h-5 text-white"></i></button><div class="flex flex-col items-center text-center"><div class="p-3 gradient-bg rounded-xl mb-4"><i data-lucide="${step.icon}" class="w-12 h-12 text-[#00FF94]"></i></div><h3 class="text-2xl lg:text-3xl font-bold text-[#00FF94] mb-4">${step.title}</h3><div class="text-white/90 text-base leading-relaxed text-left">${step.content}</div></div></div><div class="flex justify-center gap-4">${learningStep > 0 ? '<button class="px-8 py-4 bg-white/10 border border-white/20 rounded-xl text-lg font-semibold text-white hover:bg-[#2D7EE7] transition-all" onclick="prevStep()"><i data-lucide="arrow-left" class="inline mr-2"></i>Назад</button>' : ''}${!isLast ? '<button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-lg font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="nextStep()">Далее <i data-lucide="arrow-right" class="inline ml-2"></i></button>' : '<button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-lg font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="finishLearning()">Завершить</button>'}</div></div></div>`;
     }
-
-    function initWidgets() {
-      const genBtn = document.getElementById('widgetGeneratePassword');
-      const passOutput = document.getElementById('widgetPasswordOutput');
-      const copyBtn = document.getElementById('widgetCopyPassword');
-      if (genBtn && passOutput && copyBtn) {
-        genBtn.addEventListener('click', () => {
-          const length = Math.floor(Math.random() * 5) + 12;
-          const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
-          let password = '';
-          for (let i = 0; i < length; i++) password += chars.charAt(Math.floor(Math.random() * chars.length));
-          passOutput.value = password;
-        });
-        copyBtn.addEventListener('click', () => {
-          if (passOutput.value) { navigator.clipboard.writeText(passOutput.value); alert('Пароль скопирован'); }
-        });
-      }
-      const pinInput = document.getElementById('widgetPinInput');
-      const pinResult = document.getElementById('widgetPinResult');
-      if (pinInput && pinResult) {
-        pinInput.addEventListener('input', () => {
-          let pin = pinInput.value;
-          const weakPins = ['1234', '0000', '1111', '2222', '3333', '4444', '5555', '6666', '7777', '8888', '9999', '1212', '1122', '123456', '12345678'];
-          if (pin.length < 4) pinResult.innerHTML = '<span class="text-yellow-300">Слишком короткий</span>';
-          else if (weakPins.includes(pin)) pinResult.innerHTML = '<span class="text-red-400">⚠️ Слабый PIN (легко угадать)</span>';
-          else if (/^\d+$/.test(pin) && pin.length >= 4) pinResult.innerHTML = '<span class="text-green-400">✅ Хороший PIN</span>';
-          else pinResult.innerHTML = '<span class="text-red-400">Только цифры</span>';
-        });
-      }
-      const checkPermBtn = document.getElementById('widgetCheckPerm');
-      const permResult = document.getElementById('widgetPermResult');
-      if (checkPermBtn && permResult) {
-        checkPermBtn.addEventListener('click', () => {
-          const app = document.getElementById('widgetAppSelect').value;
-          const perm = document.getElementById('widgetPermSelect').value;
-          let verdict = '';
-          if (app === 'flashlight' && perm === 'contacts') verdict = '🔴 ОПАСНО: фонарику не нужны контакты!';
-          else if (app === 'calculator' && (perm === 'camera' || perm === 'sms')) verdict = '🔴 ОПАСНО: калькулятору не нужны камера или SMS';
-          else if (app === 'game' && perm === 'sms') verdict = '🔴 ОПАСНО: игры не должны читать ваши SMS';
-          else if (perm === 'contacts' || perm === 'camera' || perm === 'sms' || perm === 'location') verdict = '🟡 Подозрительно: приложение запрашивает чувствительные данные';
-          else verdict = '✅ Нормально: разрешение соответствует функции';
-          permResult.innerHTML = `<span class="text-sm">${verdict}</span>`;
-        });
-      }
-
-      const mobileGenBtn = document.getElementById('mobileWidgetGeneratePassword');
-      const mobilePassOutput = document.getElementById('mobileWidgetPasswordOutput');
-      const mobileCopyBtn = document.getElementById('mobileWidgetCopyPassword');
-      if (mobileGenBtn && mobilePassOutput && mobileCopyBtn) {
-        mobileGenBtn.addEventListener('click', () => {
-          const length = Math.floor(Math.random() * 5) + 12;
-          const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
-          let password = '';
-          for (let i = 0; i < length; i++) password += chars.charAt(Math.floor(Math.random() * chars.length));
-          mobilePassOutput.value = password;
-        });
-        mobileCopyBtn.addEventListener('click', () => {
-          if (mobilePassOutput.value) { navigator.clipboard.writeText(mobilePassOutput.value); alert('Пароль скопирован'); }
-        });
-      }
-      const mobilePinInput = document.getElementById('mobileWidgetPinInput');
-      const mobilePinResult = document.getElementById('mobileWidgetPinResult');
-      if (mobilePinInput && mobilePinResult) {
-        mobilePinInput.addEventListener('input', () => {
-          let pin = mobilePinInput.value;
-          const weakPins = ['1234', '0000', '1111', '2222', '3333', '4444', '5555', '6666', '7777', '8888', '9999', '1212', '1122', '123456', '12345678'];
-          if (pin.length < 4) mobilePinResult.innerHTML = '<span class="text-yellow-300">Слишком короткий</span>';
-          else if (weakPins.includes(pin)) mobilePinResult.innerHTML = '<span class="text-red-400">⚠️ Слабый PIN (легко угадать)</span>';
-          else if (/^\d+$/.test(pin) && pin.length >= 4) mobilePinResult.innerHTML = '<span class="text-green-400">✅ Хороший PIN</span>';
-          else mobilePinResult.innerHTML = '<span class="text-red-400">Только цифры</span>';
-        });
-      }
-      const mobileCheckPermBtn = document.getElementById('mobileWidgetCheckPerm');
-      const mobilePermResult = document.getElementById('mobileWidgetPermResult');
-      if (mobileCheckPermBtn && mobilePermResult) {
-        mobileCheckPermBtn.addEventListener('click', () => {
-          const app = document.getElementById('mobileWidgetAppSelect').value;
-          const perm = document.getElementById('mobileWidgetPermSelect').value;
-          let verdict = '';
-          if (app === 'flashlight' && perm === 'contacts') verdict = '🔴 ОПАСНО: фонарику не нужны контакты!';
-          else if (app === 'calculator' && (perm === 'camera' || perm === 'sms')) verdict = '🔴 ОПАСНО: калькулятору не нужны камера или SMS';
-          else if (app === 'game' && perm === 'sms') verdict = '🔴 ОПАСНО: игры не должны читать ваши SMS';
-          else if (perm === 'contacts' || perm === 'camera' || perm === 'sms' || perm === 'location') verdict = '🟡 Подозрительно: приложение запрашивает чувствительные данные';
-          else verdict = '✅ Нормально: разрешение соответствует функции';
-          mobilePermResult.innerHTML = `<span class="text-sm">${verdict}</span>`;
-        });
-      }
-    }
-
-    // Остальные функции рендеринга (квиз, игра) без изменений
     function renderQuiz() {
       const q = quizState.questions[quizState.currentQuestion];
       const progress = ((quizState.currentQuestion + 1) / quizState.questions.length) * 100;
       if (quizState.currentQuestion >= quizState.questions.length) return renderQuizResult();
       return `<div class="min-h-screen w-full pt-4 pb-12"><div class="w-full px-4 lg:px-8 max-w-4xl mx-auto"><div class="mb-4"><div class="flex justify-between items-center mb-2"><span class="text-white/60">Вопрос ${quizState.currentQuestion + 1} из ${quizState.questions.length}</span><span class="text-[#00FF94] font-semibold">Счёт: ${quizState.score}</span></div><div class="w-full bg-[#1a3150] rounded-full h-3"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-3 rounded-full" style="width: ${progress}%;"></div></div></div><div class="bg-[#1a3150] border border-white/10 rounded-3xl p-8 lg:p-12 mb-8"><div class="flex flex-col lg:flex-row gap-8 items-start"><div class="flex-1"><h2 class="text-2xl lg:text-3xl font-bold text-white mb-8">${q.question}</h2><div class="space-y-4">${q.options.map((opt, idx) => `<button class="quiz-option w-full p-4 rounded-xl text-left transition-all ${quizState.selectedAnswer === null ? 'bg-white/5 hover:bg-white/10 border-2 border-transparent hover:border-[#00FF94]/50 text-white' : idx === q.correct ? 'bg-[#00FF94]/20 border-2 border-[#00FF94] text-white' : idx === quizState.selectedAnswer ? 'bg-red-500/20 border-2 border-red-500 text-white' : 'bg-white/5 border-2 border-transparent text-white/50'}" onclick="selectQuizAnswer(${idx})" ${quizState.selectedAnswer !== null ? 'disabled' : ''}><div class="flex items-center gap-3">${quizState.selectedAnswer !== null ? (idx === q.correct ? '<i data-lucide="check-circle" class="text-[#00FF94] flex-shrink-0" size="24"></i>' : idx === quizState.selectedAnswer ? '<i data-lucide="x-circle" class="text-red-500 flex-shrink-0" size="24"></i>' : '') : ''}<span class="flex-1">${opt}</span></div></button>`).join('')}</div></div><div class="hidden lg:block lg:w-auto relative flex flex-col items-center mt-40">${quizState.showExplanation ? `<div class="speech-bubble absolute right-0 bottom-full mb-2 z-10" style="right: -200px; min-width: 250px;">${q.explanation}</div>` : ''}${getMascotSVG(quizState.showExplanation ? (quizState.selectedAnswer === q.correct ? 'happy' : 'thinking') : 'pointing', 'w-60 h-60')}</div></div></div>${quizState.showExplanation ? `<div class="flex justify-center"><button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105" onclick="nextQuizQuestion()">${quizState.currentQuestion < quizState.questions.length - 1 ? 'Следующий вопрос' : 'Завершить'}</button></div>` : ''}<div class="lg:hidden mt-8 flex flex-col items-center">${quizState.showExplanation ? `<div class="speech-bubble mb-4" style="max-width: 90%;">${q.explanation}</div>${getMascotSVG(quizState.showExplanation ? (quizState.selectedAnswer === q.correct ? 'happy' : 'thinking') : 'pointing', 'w-48 h-48')}` : ''}</div></div></div>`;
     }
-
     function renderQuizResult() {
       const percent = (quizState.score / quizState.questions.length) * 100;
       return `<div class="min-h-screen w-full pt-4 pb-12"><div class="w-full px-4 lg:px-8 max-w-4xl mx-auto"><div class="flex flex-col items-center"><div class="w-full max-w-2xl"><div class="bg-[#1a3150] border border-white/10 rounded-3xl p-8 lg:p-12"><i data-lucide="trophy" class="w-20 h-20 text-[#00FF94] mx-auto mb-6"></i><h1 class="text-4xl lg:text-5xl font-bold text-white text-center mb-4">Квиз завершён!</h1><div class="text-6xl font-bold bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] bg-clip-text text-transparent text-center mb-4">${quizState.score} / ${quizState.questions.length}</div><p class="text-xl text-white/80 text-center mb-8">${percent === 100 ? 'Идеально! Ты настоящий киберэксперт! 🏆' : percent >= 80 ? 'Отлично! Ты хорошо разбираешься в безопасности! 🌟' : percent >= 60 ? 'Хорошо! Но есть куда расти! 💪' : percent >= 40 ? 'Неплохо! Рекомендую пройти материалы ещё раз 📚' : 'Нужно подучиться! Начни с главной страницы 🔄'}</p><div class="w-full bg-[#0B1E33] rounded-full h-4 mb-8"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-4 rounded-full" style="width: ${percent}%;"></div></div><div class="flex flex-col sm:flex-row gap-4 justify-center"><button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="restartQuiz()"><i data-lucide="rotate-ccw" size="20"></i>Пройти снова</button><button class="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 hover:border-[#00FF94]/50 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="goHome()"><i data-lucide="home" size="20"></i>На главную</button></div></div></div><div class="mt-8 flex justify-center">${getMascotSVG('happy', 'w-48 h-48 lg:w-64 lg:h-64')}</div></div></div></div>`;
     }
-
     function renderGame() {
       const msg = gameState.messages[gameState.currentMessage];
       if (gameState.currentMessage >= gameState.messages.length) return renderGameResult();
@@ -641,7 +415,6 @@
       }
       return `<div class="min-h-screen w-full pt-4 pb-12"><div class="w-full px-4 lg:px-8 max-w-5xl mx-auto"><div class="mb-4"><div class="flex justify-between items-center mb-2"><span class="text-white/60">Сообщение ${gameState.currentMessage + 1} из ${gameState.messages.length}</span><span class="text-[#00FF94] font-semibold">Счёт: ${gameState.score}</span></div><div class="w-full bg-[#1a3150] rounded-full h-3"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-3 rounded-full" style="width: ${((gameState.currentMessage + 1) / gameState.messages.length) * 100}%;"></div></div></div><div class="flex justify-center"><div class="relative"><div class="max-w-md w-full transition-all duration-300"><div class="bg-[#1a3150] border-4 rounded-[2.5rem] p-4 shadow-2xl ${cardHighlightClass}"><div class="bg-[#0B1E33] rounded-t-3xl p-4 mb-2"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#00FF94] to-[#2D7EE7] flex items-center justify-center"><i data-lucide="smartphone" size="20" class="text-[#0B1E33]"></i></div><div class="flex-1"><div class="text-white font-semibold">${msg.from}</div>${msg.subject ? `<div class="text-white/60 text-sm">${msg.subject}</div>` : ''}<div class="text-white/40 text-xs">${msg.type === 'sms' ? 'SMS' : 'Email'}</div></div></div></div><div class="bg-white/5 rounded-2xl p-6 min-h-[250px]"><p class="text-white whitespace-pre-line leading-relaxed">${msg.message}</p></div></div>${!gameState.showResult ? `<div class="flex flex-col sm:flex-row gap-4 justify-center mt-8"><button class="px-8 py-4 bg-red-500/20 border-2 border-red-500 text-white rounded-xl font-semibold hover:bg-red-500/30 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="selectGameAnswer(true)"><i data-lucide="alert-triangle" size="20"></i>Это мошенники</button><button class="px-8 py-4 bg-[#00FF94]/20 border-2 border-[#00FF94] text-white rounded-xl font-semibold hover:bg-[#00FF94]/30 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="selectGameAnswer(false)"><i data-lucide="check-circle" size="20"></i>Всё нормально</button></div>` : ''}${gameState.showResult ? `<div class="flex justify-center mt-8"><button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105" onclick="nextGameMessage()">${gameState.currentMessage < gameState.messages.length - 1 ? 'Следующее сообщение' : 'Завершить'}</button></div>` : ''}</div><div class="hidden lg:block absolute left-full top-1/2 transform -translate-y-1/2 ml-4">${gameState.showResult ? `<div class="speech-bubble game-bubble" style="top: -90px; left: 85%;">${msg.explanation}</div>` : ''}${getMascotSVG(gameState.showResult ? (gameState.selectedAnswer === msg.isScam ? 'happy' : 'thinking') : 'pointing', 'w-60 h-60')}</div></div></div><div class="lg:hidden mt-8 flex flex-col items-center">${gameState.showResult ? `<div class="speech-bubble mb-4" style="max-width: 90%;">${msg.explanation}</div>${getMascotSVG(gameState.showResult ? (gameState.selectedAnswer === msg.isScam ? 'happy' : 'thinking') : 'pointing', 'w-48 h-48')}` : ''}</div></div></div>`;
     }
-
     function renderGameResult() {
       const percent = (gameState.score / gameState.messages.length) * 100;
       return `<div class="min-h-screen w-full pt-4 pb-12"><div class="w-full px-4 lg:px-8 max-w-2xl mx-auto text-center">${getMascotSVG('happy', 'w-40 h-40 mx-auto mb-8')}<div class="bg-[#1a3150] border border-white/10 rounded-3xl p-8 lg:p-12 mb-8"><i data-lucide="alert-triangle" class="w-20 h-20 text-[#00FF94] mx-auto mb-6"></i><h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">Детектив завершён!</h1><div class="text-6xl font-bold bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] bg-clip-text text-transparent mb-4">${gameState.score} / ${gameState.messages.length}</div><p class="text-xl text-white/80 mb-8">${percent === 100 ? 'Идеально! Ты — настоящий детектив мошенничества! 🕵️' : percent >= 75 ? 'Отлично! Мошенникам будет сложно тебя обмануть! 🌟' : percent >= 50 ? 'Хорошо! Но будь внимательнее! 👀' : 'Нужно быть осторожнее! Пройди ещё раз! 🔄'}</p><div class="w-full bg-[#0B1E33] rounded-full h-4 mb-8"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-4 rounded-full" style="width: ${percent}%;"></div></div></div><div class="flex flex-col sm:flex-row gap-4 justify-center"><button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="restartGame()"><i data-lucide="rotate-ccw" size="20"></i>Пройти снова</button><button class="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 hover:border-[#00FF94]/50 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="goHome()"><i data-lucide="home" size="20"></i>На главную</button></div></div></div>`;
@@ -658,8 +431,11 @@
         if (currentTopic === 'phone') activeNav = 'phone';
         else if (currentTopic === 'internet') activeNav = 'internet';
         else if (currentTopic === 'computer') activeNav = 'computer';
-      } else if (currentScreen === 'quiz') activeNav = 'quiz';
-      else if (currentScreen === 'game') activeNav = 'game';
+      } else if (currentScreen === 'quiz') {
+        activeNav = 'quiz';
+      } else if (currentScreen === 'game') {
+        activeNav = 'game';
+      }
       if (activeNav) {
         const activeItem = document.querySelector(`[data-nav="${activeNav}"]`);
         if (activeItem) {
@@ -679,11 +455,9 @@
       else if (currentScreen === 'game') html = renderGame();
       content.innerHTML = html; lucide.createIcons();
       updateActiveNav();
-      if (currentScreen === 'learning') {
-        setTimeout(() => initWidgets(), 50);
-      }
     }
 
+    // Навигация и обработчики
     window.navigateTo = function(screen) {
       stopSpeech();
       if (screen === 'quiz') { quizState.currentQuestion = 0; quizState.selectedAnswer = null; quizState.showExplanation = false; quizState.score = 0; currentScreen = 'quiz'; renderScreen(); }
@@ -724,8 +498,11 @@
     };
     window.restartGame = function() { stopSpeech(); gameState.currentMessage = 0; gameState.selectedAnswer = null; gameState.showResult = false; gameState.score = 0; renderScreen(); };
 
+    // Обработчики UI
     document.getElementById('mobileMenuBtn').addEventListener('click', () => { document.getElementById('mobileNav').classList.toggle('hidden'); });
     document.getElementById('logo').addEventListener('click', goHome);
+
+    // Загрузка данных и запуск
     loadData();
   </script>
 </body>
