@@ -50,7 +50,7 @@
     #networkCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.6; }
     .relative { z-index: 2; }
 
-    /* ========== СТИЛИ ДЛЯ ТЕЛЕФОНА (из Figma) ========== */
+    /* ========== СТИЛИ ДЛЯ ТЕЛЕФОНА ========== */
     .phone-frame {
       background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
       border-radius: 3rem;
@@ -109,12 +109,12 @@
     .card-enter { animation: cardFadeIn 0.4s ease-out; }
     @keyframes cardFadeIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
 
-    /* ========== СТИЛИ ДЛЯ КОМПЬЮТЕРА (из Figma) ========== */
+    /* ========== СТИЛИ ДЛЯ КОМПЬЮТЕРА (объёмный) ========== */
     .computer-monitor {
-      background: #1a1a2e;
+      background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
       border-radius: 1.5rem 1.5rem 0.5rem 0.5rem;
       padding: 1rem;
-      box-shadow: 0 0 0 4px #2D7EE7, 0 20px 30px rgba(0,0,0,0.4);
+      box-shadow: 0 0 0 4px #2D7EE7, 0 20px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
       width: 700px;
       margin: 0 auto;
     }
@@ -123,6 +123,7 @@
       border-radius: 1rem;
       overflow: hidden;
       height: 450px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
     }
     .computer-content {
       padding: 20px;
@@ -133,16 +134,18 @@
     .computer-stand {
       width: 100px;
       height: 20px;
-      background: #2D7EE7;
+      background: linear-gradient(145deg, #2D7EE7, #1a5ab0);
       margin: 0 auto;
       border-radius: 0 0 10px 10px;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.3);
     }
     .computer-base {
       width: 180px;
       height: 8px;
-      background: #1a1a2e;
+      background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
       margin: 5px auto 0;
       border-radius: 4px;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.3);
     }
     .computer-window {
       background: linear-gradient(145deg, #1a3150, #0B1E33);
@@ -152,6 +155,7 @@
       height: 100%;
       display: flex;
       flex-direction: column;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
     }
     .window-bar {
       background: rgba(0,255,148,0.2);
@@ -168,13 +172,14 @@
     .window-title { color: white; font-weight: 600; font-size: 14px; }
     .window-content { flex: 1; padding: 20px; overflow-y: auto; }
 
-    /* ========== СТИЛИ ДЛЯ ИНТЕРНЕТА (3D СЕТЬ из Figma) ========== */
+    /* ========== СТИЛИ ДЛЯ ИНТЕРНЕТА (3D СЕТЬ) ========== */
     .internet-3d-scene {
       perspective: 1200px;
       perspective-origin: 50% 50%;
       width: 100%;
-      height: 600px;
+      min-height: 600px;
       position: relative;
+      overflow: visible;
     }
     .internet-camera {
       width: 100%;
@@ -182,6 +187,7 @@
       transform-style: preserve-3d;
       transition: transform 1.2s cubic-bezier(0.23, 1, 0.32, 1);
       position: relative;
+      min-height: 600px;
     }
     .internet-node {
       position: absolute;
@@ -319,16 +325,16 @@
       return `<div class="min-h-screen w-full flex items-start justify-center pt-16"><div class="w-full px-4 lg:px-8 max-w-6xl mx-auto"><h2 class="text-4xl lg:text-5xl font-bold text-white text-center mb-10">Что будем проверять?</h2><div class="flex flex-col md:flex-row items-center justify-center gap-8"><div class="topic-card"><div class="w-40 h-40 topic-figure relative"><svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl relative z-10"><defs><linearGradient id="gradBulb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs><ellipse cx="60" cy="55" rx="25" ry="32" fill="url(#gradBulb)" stroke="#0B1E33" stroke-width="3"/><rect x="52" y="82" width="16" height="15" rx="4" fill="#2D7EE7" stroke="#0B1E33" stroke-width="2"/><line x1="60" y1="82" x2="60" y2="72" stroke="#0B1E33" stroke-width="2"/><path class="bulb-filament" d="M50 45 Q60 35 70 45" stroke="#666" stroke-width="3" fill="none"/></svg><div class="bulb-glow absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-all duration-300" style="background: radial-gradient(circle at center, rgba(255,215,0,0.6) 0%, rgba(255,215,0,0) 70%); filter: blur(12px);"></div></div><button class="topic-button" onclick="navigateTo('quiz')">Квиз</button></div><div class="topic-card"><div class="w-40 h-40 topic-figure"><svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl"><defs><linearGradient id="gradMask" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs><path d="M30 30 Q60 15 90 30 L90 75 Q60 95 30 75 Z" fill="#1a2a3a" stroke="#0B1E33" stroke-width="3"/><ellipse cx="45" cy="55" rx="10" ry="7" fill="white" stroke="#0B1E33" stroke-width="2"/><ellipse cx="75" cy="55" rx="10" ry="7" fill="white" stroke="#0B1E33" stroke-width="2"/><circle cx="42" cy="53" r="4" fill="#0B1E33"/><circle cx="78" cy="53" r="4" fill="#0B1E33"/><circle cx="25" cy="90" r="18" fill="none" stroke="#0B1E33" stroke-width="4"/><line x1="15" y1="80" x2="35" y2="100" stroke="#0B1E33" stroke-width="2"/><line x1="35" y1="80" x2="15" y2="100" stroke="#0B1E33" stroke-width="2"/><path d="M38 102 Q45 110 55 108" stroke="#0B1E33" stroke-width="5" fill="none" stroke-linecap="round"/></svg></div><button class="topic-button" onclick="navigateTo('game')">Найди мошенника</button></div></div></div></div>`;
     }
 
-    // ---------- ТЕЛЕФОН (по Figma) ----------
+    // ---------- ТЕЛЕФОН (уменьшен отступ заголовка) ----------
     function renderPhone() {
       const steps = phoneSteps;
       const step = steps[learningStep];
       const isLast = learningStep === steps.length - 1;
       return `
         <div class="w-full px-4 lg:px-8 max-w-4xl mx-auto">
-          <div class="text-center mb-4">
-            <div class="flex justify-between items-center text-white/60 text-sm mb-2"><span>Шаг ${learningStep+1} из ${steps.length}</span><button class="hover:text-[#00FF94]" onclick="goBack()">← Назад</button></div>
-            <div class="w-full bg-[#1a3150] rounded-full h-2 mb-4"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-2 rounded-full" style="width: ${((learningStep+1)/steps.length)*100}%;"></div></div>
+          <div class="text-center mb-2">
+            <div class="flex justify-between items-center text-white/60 text-sm mb-1"><span>Шаг ${learningStep+1} из ${steps.length}</span><button class="hover:text-[#00FF94]" onclick="goBack()">← Назад</button></div>
+            <div class="w-full bg-[#1a3150] rounded-full h-2"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-2 rounded-full" style="width: ${((learningStep+1)/steps.length)*100}%;"></div></div>
           </div>
           <div class="flex justify-center">
             <div class="phone-frame" id="swipeCard">
@@ -337,13 +343,13 @@
                 <div class="phone-content">
                   <div class="flex-1 flex flex-col">
                     <div class="card-enter">
-                      <div class="flex items-center gap-3 mb-6">
-                        <div class="p-3 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-2xl border border-[#00FF94]/30"><i data-lucide="${step.icon}" class="w-8 h-8 text-[#00FF94]"></i></div>
-                        <div class="flex-1"><div class="text-2xl mb-1">📱</div><h3 class="text-white font-bold text-lg">${step.title}</h3></div>
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="p-2 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-2xl border border-[#00FF94]/30"><i data-lucide="${step.icon}" class="w-6 h-6 text-[#00FF94]"></i></div>
+                        <div class="flex-1"><div class="text-xl mb-0">📱</div><h3 class="text-white font-bold text-md">${step.title}</h3></div>
                       </div>
-                      <div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 border border-[#00FF94]/30 rounded-2xl p-4 mb-4"><p class="text-white font-semibold text-center">${step.content.split('•')[0]}</p></div>
-                      <div class="space-y-2 mb-4 flex-1">${step.content.split('<br>').filter(p=>p.includes('•')).map(p=>`<div class="flex items-start gap-2 bg-white/5 rounded-xl p-3 border border-white/10"><i data-lucide="shield" class="w-4 h-4 text-[#00FF94] mt-0.5"></i><span class="text-white/90 text-sm">${p.replace('•','').trim()}</span></div>`).join('')}</div>
-                      <div class="bg-[#1a3150] border border-[#2D7EE7]/30 rounded-2xl p-3 flex items-start gap-2"><div class="w-10 h-10">${getMascotSVG('happy', 'w-10 h-10')}</div><p class="text-[#00FF94] text-sm">💡 Совет: ${step.title.includes('PIN')?'Всегда меняйте PIN по умолчанию':step.title.includes('Блокировка')?'Используйте биометрию + пароль':step.title.includes('Разрешения')?'Проверяйте права приложений':step.title.includes('Вирусы')?'Регулярно обновляйте систему':'Будьте внимательны в сети'}</p></div>
+                      <div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 border border-[#00FF94]/30 rounded-xl p-3 mb-3"><p class="text-white font-semibold text-sm text-center">${step.content.split('•')[0]}</p></div>
+                      <div class="space-y-1 mb-3 flex-1">${step.content.split('<br>').filter(p=>p.includes('•')).map(p=>`<div class="flex items-start gap-2 bg-white/5 rounded-lg p-2 border border-white/10"><i data-lucide="shield" class="w-3 h-3 text-[#00FF94] mt-0.5"></i><span class="text-white/90 text-xs">${p.replace('•','').trim()}</span></div>`).join('')}</div>
+                      <div class="bg-[#1a3150] border border-[#2D7EE7]/30 rounded-xl p-2 flex items-start gap-2"><div class="w-8 h-8">${getMascotSVG('happy', 'w-8 h-8')}</div><p class="text-[#00FF94] text-xs">💡 Совет: ${step.title.includes('PIN')?'Всегда меняйте PIN по умолчанию':step.title.includes('Блокировка')?'Используйте биометрию + пароль':step.title.includes('Разрешения')?'Проверяйте права приложений':step.title.includes('Вирусы')?'Регулярно обновляйте систему':'Будьте внимательны в сети'}</p></div>
                     </div>
                   </div>
                 </div>
@@ -351,60 +357,96 @@
               </div>
             </div>
           </div>
-          <div class="flex justify-center gap-4 mt-8">
-            ${learningStep>0 ? '<button class="px-8 py-4 bg-white/10 border border-white/20 rounded-xl text-lg font-semibold text-white hover:bg-[#2D7EE7] transition-all" onclick="prevStep()"><i data-lucide="arrow-left" class="inline mr-2"></i>Назад</button>' : ''}
-            ${!isLast ? '<button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-lg font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="nextStep()">Далее <i data-lucide="arrow-right" class="inline ml-2"></i></button>' : '<button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-lg font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="finishLearning()">Завершить</button>'}
+          <div class="flex justify-center gap-4 mt-6">
+            ${learningStep>0 ? '<button class="px-6 py-3 bg-white/10 border border-white/20 rounded-xl text-base font-semibold text-white hover:bg-[#2D7EE7] transition-all" onclick="prevStep()"><i data-lucide="arrow-left" class="inline mr-2"></i>Назад</button>' : ''}
+            ${!isLast ? '<button class="px-6 py-3 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-base font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="nextStep()">Далее <i data-lucide="arrow-right" class="inline ml-2"></i></button>' : '<button class="px-6 py-3 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-base font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="finishLearning()">Завершить</button>'}
           </div>
         </div>
       `;
     }
 
-    // ---------- КОМПЬЮТЕР (по Figma) ----------
+    // ---------- КОМПЬЮТЕР (объёмный) ----------
     function renderComputer() {
       const steps = computerSteps;
       const step = steps[learningStep];
       const isLast = learningStep === steps.length - 1;
       return `
         <div class="w-full px-4 lg:px-8 max-w-5xl mx-auto">
-          <div class="text-center mb-4">
-            <div class="flex justify-between items-center text-white/60 text-sm mb-2"><span>Шаг ${learningStep+1} из ${steps.length}</span><button class="hover:text-[#00FF94]" onclick="goBack()">← Назад</button></div>
-            <div class="w-full bg-[#1a3150] rounded-full h-2 mb-4"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-2 rounded-full" style="width: ${((learningStep+1)/steps.length)*100}%;"></div></div>
+          <div class="text-center mb-2">
+            <div class="flex justify-between items-center text-white/60 text-sm mb-1"><span>Шаг ${learningStep+1} из ${steps.length}</span><button class="hover:text-[#00FF94]" onclick="goBack()">← Назад</button></div>
+            <div class="w-full bg-[#1a3150] rounded-full h-2"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-2 rounded-full" style="width: ${((learningStep+1)/steps.length)*100}%;"></div></div>
           </div>
           <div class="flex justify-center">
-            <div><div class="computer-monitor"><div class="computer-screen"><div class="computer-content"><div class="computer-window"><div class="window-bar"><div class="window-dots"><div class="dot-red"></div><div class="dot-yellow"></div><div class="dot-green"></div></div><div class="window-title">${step.title}</div><div class="text-2xl ml-auto">🖥️</div></div><div class="window-content"><div class="flex justify-center mb-4"><i data-lucide="${step.icon}" class="w-12 h-12 text-[#00FF94]"></i></div><div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 rounded-xl p-3 mb-4"><p class="text-white font-bold text-center">${step.content.split('•')[0]}</p></div><div class="grid grid-cols-2 gap-3">${step.content.split('<br>').filter(p=>p.includes('•')).slice(0,4).map(p=>`<div class="bg-white/5 rounded-xl p-3 flex items-start gap-2"><i data-lucide="shield" class="w-4 h-4 text-[#00FF94] mt-0.5"></i><span class="text-white/80 text-xs">${p.replace('•','').trim()}</span></div>`).join('')}</div><div class="mt-4 bg-[#0B1E33] rounded-xl p-3 flex items-center gap-2"><div class="w-8 h-8">${getMascotSVG('thinking', 'w-8 h-8')}</div><p class="text-[#00FF94] text-xs">💡 ${step.title.includes('Windows')?'Скачивайте Windows только с microsoft.com':step.title.includes('Пароль')?'Используйте менеджер паролей':'Обновляйте антивирус'}</p></div></div></div></div></div></div><div class="computer-stand"></div><div class="computer-base"></div></div>
+            <div><div class="computer-monitor"><div class="computer-screen"><div class="computer-content"><div class="computer-window"><div class="window-bar"><div class="window-dots"><div class="dot-red"></div><div class="dot-yellow"></div><div class="dot-green"></div></div><div class="window-title">${step.title}</div><div class="text-xl ml-auto">🖥️</div></div><div class="window-content"><div class="flex justify-center mb-3"><i data-lucide="${step.icon}" class="w-8 h-8 text-[#00FF94]"></i></div><div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 rounded-lg p-2 mb-3"><p class="text-white font-bold text-sm text-center">${step.content.split('•')[0]}</p></div><div class="grid grid-cols-2 gap-2">${step.content.split('<br>').filter(p=>p.includes('•')).slice(0,4).map(p=>`<div class="bg-white/5 rounded-lg p-2 flex items-start gap-2"><i data-lucide="shield" class="w-3 h-3 text-[#00FF94] mt-0.5"></i><span class="text-white/80 text-xs">${p.replace('•','').trim()}</span></div>`).join('')}</div><div class="mt-3 bg-[#0B1E33] rounded-lg p-2 flex items-center gap-2"><div class="w-7 h-7">${getMascotSVG('thinking', 'w-7 h-7')}</div><p class="text-[#00FF94] text-xs">💡 ${step.title.includes('Windows')?'Скачивайте Windows только с microsoft.com':step.title.includes('Пароль')?'Используйте менеджер паролей':'Обновляйте антивирус'}</p></div></div></div></div></div></div><div class="computer-stand"></div><div class="computer-base"></div></div>
           </div>
-          <div class="flex justify-center gap-4 mt-8">
-            ${learningStep>0 ? '<button class="px-8 py-4 bg-white/10 border border-white/20 rounded-xl text-lg font-semibold text-white hover:bg-[#2D7EE7] transition-all" onclick="prevStep()"><i data-lucide="arrow-left" class="inline mr-2"></i>Назад</button>' : ''}
-            ${!isLast ? '<button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-lg font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="nextStep()">Далее <i data-lucide="arrow-right" class="inline ml-2"></i></button>' : '<button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-lg font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="finishLearning()">Завершить</button>'}
+          <div class="flex justify-center gap-4 mt-6">
+            ${learningStep>0 ? '<button class="px-6 py-3 bg-white/10 border border-white/20 rounded-xl text-base font-semibold text-white hover:bg-[#2D7EE7] transition-all" onclick="prevStep()"><i data-lucide="arrow-left" class="inline mr-2"></i>Назад</button>' : ''}
+            ${!isLast ? '<button class="px-6 py-3 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-base font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="nextStep()">Далее <i data-lucide="arrow-right" class="inline ml-2"></i></button>' : '<button class="px-6 py-3 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-base font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="finishLearning()">Завершить</button>'}
           </div>
         </div>
       `;
     }
 
-    // ---------- ИНТЕРНЕТ (3D сеть по Figma) ----------
+    // ---------- ИНТЕРНЕТ (3D сеть, без скролла, как в Figma) ----------
     let internetCamera = null;
     function renderInternet() {
       const steps = internetSteps;
-      const nodes = steps.map((_, i) => ({ x: (i-1)*300, y: Math.sin(i)*150, z: (i-2)*200 }));
+      // Позиции узлов в 3D-пространстве (центр, верхний правый, нижний левый, нижний правый)
+      const nodes = steps.map((_, i) => {
+        if (i === 0) return { x: 0, y: 0, z: 0 };
+        if (i === 1) return { x: 400, y: -200, z: -300 };
+        if (i === 2) return { x: -300, y: 200, z: -250 };
+        return { x: 350, y: 250, z: -400 };
+      });
       internetNodesPositions = nodes;
       const cameraX = -nodes[learningStep].x;
       const cameraY = -nodes[learningStep].y;
       const cameraZ = -nodes[learningStep].z + 500;
+      // Линии между узлами (все пары)
+      const lines = [];
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i+1; j < nodes.length; j++) {
+          lines.push({ from: i, to: j });
+        }
+      }
       return `
         <div class="w-full px-4 lg:px-8 max-w-6xl mx-auto">
-          <div class="text-center mb-4">
-            <div class="flex justify-between items-center text-white/60 text-sm mb-2"><span>Узел ${learningStep+1} из ${steps.length}</span><button class="hover:text-[#00FF94]" onclick="goBack()">← Назад</button></div>
-            <div class="w-full bg-[#1a3150] rounded-full h-2 mb-4"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-2 rounded-full" style="width: ${((learningStep+1)/steps.length)*100}%;"></div></div>
+          <div class="text-center mb-2">
+            <div class="flex justify-between items-center text-white/60 text-sm mb-1"><span>Узел ${learningStep+1} из ${steps.length}</span><button class="hover:text-[#00FF94]" onclick="goBack()">← Назад</button></div>
+            <div class="w-full bg-[#1a3150] rounded-full h-2"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-2 rounded-full" style="width: ${((learningStep+1)/steps.length)*100}%;"></div></div>
           </div>
-          <div class="internet-3d-scene">
+          <div class="internet-3d-scene" style="overflow: visible; min-height: 500px;">
             <div class="internet-camera" id="internetCamera" style="transform: translate3d(${cameraX}px, ${cameraY}px, ${cameraZ}px);">
-              <svg class="internet-lines" style="position: absolute; width: 100%; height: 100%;"><defs><linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs>${nodes.map((_, i) => nodes.slice(i+1).map((_, j) => `<line x1="${nodes[i].x+400}" y1="${nodes[i].y+300}" x2="${nodes[j+i+1].x+400}" y2="${nodes[j+i+1].y+300}" stroke="url(#lineGradient)" stroke-width="1.5" stroke-dasharray="4 4" />`)).join('')}</svg>
-              ${nodes.map((node, idx) => `<div class="internet-node ${idx === learningStep ? 'active' : ''}" style="transform: translate3d(${node.x}px, ${node.y}px, ${node.z}px);"><div class="node-sphere"></div><div class="internet-card-wrapper"><div class="internet-card-node"><div class="flex items-center gap-3 mb-4"><div class="p-3 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-2xl"><i data-lucide="${steps[idx].icon}" class="w-8 h-8 text-[#00FF94]"></i></div><div><div class="text-2xl">🌐</div><h3 class="text-white font-bold">${steps[idx].title}</h3></div></div><div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 rounded-xl p-3 mb-3"><p class="text-white text-center">${steps[idx].content.split('•')[0]}</p></div><div class="space-y-2">${steps[idx].content.split('<br>').filter(p=>p.includes('•')).slice(0,3).map(p=>`<div class="flex items-start gap-2 bg-white/5 rounded-lg p-2"><i data-lucide="globe" class="w-3 h-3 text-[#00FF94] mt-0.5"></i><span class="text-white/80 text-xs">${p.replace('•','').trim()}</span></div>`).join('')}</div><div class="mt-3 bg-[#0B1E33] rounded-xl p-2 flex items-center gap-2"><div class="w-6 h-6">${getMascotSVG('winking', 'w-6 h-6')}</div><p class="text-[#00FF94] text-xs">💡 ${steps[idx].title.includes('VPN')?'Бесплатные VPN продают данные':steps[idx].title.includes('Коды')?'Никому не сообщайте код':'Всегда проверяйте ссылки'}</p></div></div></div></div>`).join('')}
+              <!-- Линии между узлами -->
+              <svg class="internet-lines" style="position: absolute; width: 100%; height: 100%; pointer-events: none;">
+                <defs><linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs>
+                ${lines.map(line => {
+                  const from = nodes[line.from];
+                  const to = nodes[line.to];
+                  return `<line x1="${from.x+400}" y1="${from.y+250}" x2="${to.x+400}" y2="${to.y+250}" stroke="url(#lineGradient)" stroke-width="2" stroke-dasharray="6 6" opacity="0.6" />`;
+                }).join('')}
+              </svg>
+              ${nodes.map((node, idx) => `
+                <div class="internet-node ${idx === learningStep ? 'active' : ''}" style="transform: translate3d(${node.x}px, ${node.y}px, ${node.z}px);">
+                  <div class="node-sphere"></div>
+                  <div class="internet-card-wrapper">
+                    <div class="internet-card-node">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="p-2 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-xl"><i data-lucide="${steps[idx].icon}" class="w-6 h-6 text-[#00FF94]"></i></div>
+                        <div><div class="text-xl">🌐</div><h3 class="text-white font-bold text-md">${steps[idx].title}</h3></div>
+                      </div>
+                      <div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 rounded-lg p-2 mb-2"><p class="text-white text-sm text-center">${steps[idx].content.split('•')[0]}</p></div>
+                      <div class="space-y-1">${steps[idx].content.split('<br>').filter(p=>p.includes('•')).slice(0,3).map(p=>`<div class="flex items-start gap-2 bg-white/5 rounded-lg p-2"><i data-lucide="globe" class="w-3 h-3 text-[#00FF94] mt-0.5"></i><span class="text-white/80 text-xs">${p.replace('•','').trim()}</span></div>`).join('')}</div>
+                      <div class="mt-2 bg-[#0B1E33] rounded-lg p-2 flex items-center gap-2"><div class="w-6 h-6">${getMascotSVG('winking', 'w-6 h-6')}</div><p class="text-[#00FF94] text-xs">💡 ${steps[idx].title.includes('VPN')?'Бесплатные VPN продают данные':steps[idx].title.includes('Коды')?'Никому не сообщайте код':'Всегда проверяйте ссылки'}</p></div>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
             </div>
           </div>
-          <div class="flex justify-center gap-4 mt-8">
-            ${learningStep>0 ? '<button class="px-8 py-4 bg-white/10 border border-white/20 rounded-xl text-lg font-semibold text-white hover:bg-[#2D7EE7] transition-all" onclick="prevStep()"><i data-lucide="arrow-left" class="inline mr-2"></i>Назад</button>' : ''}
-            ${learningStep < steps.length-1 ? '<button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-lg font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="nextStep()">Далее <i data-lucide="arrow-right" class="inline ml-2"></i></button>' : '<button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-lg font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="finishLearning()">Завершить</button>'}
+          <div class="flex justify-center gap-4 mt-6">
+            ${learningStep>0 ? '<button class="px-6 py-3 bg-white/10 border border-white/20 rounded-xl text-base font-semibold text-white hover:bg-[#2D7EE7] transition-all" onclick="prevStep()"><i data-lucide="arrow-left" class="inline mr-2"></i>Назад</button>' : ''}
+            ${learningStep < steps.length-1 ? '<button class="px-6 py-3 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-base font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="nextStep()">Далее <i data-lucide="arrow-right" class="inline ml-2"></i></button>' : '<button class="px-6 py-3 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-base font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="finishLearning()">Завершить</button>'}
           </div>
         </div>
       `;
@@ -438,12 +480,33 @@
       document.querySelectorAll('.internet-node').forEach((node, i) => { if (i === learningStep) node.classList.add('active'); else node.classList.remove('active'); });
     }
 
-    // ========== КВИЗ И ИГРА (оставляем без изменений – они уже есть в коде выше) ==========
-    // Для краткости здесь оставлены заглушки, но в реальном файле они будут полностью рабочими.
-    function renderQuiz() { /* полная реализация из вашего кода */ return ''; }
-    function renderQuizResult() { return ''; }
-    function renderGame() { return ''; }
-    function renderGameResult() { return ''; }
+    // ========== КВИЗ (полная версия из исходного кода) ==========
+    function renderQuiz() {
+      const q = quizState.questions[quizState.currentQuestion];
+      const progress = ((quizState.currentQuestion + 1) / quizState.questions.length) * 100;
+      if (quizState.currentQuestion >= quizState.questions.length) return renderQuizResult();
+      return `<div class="min-h-screen w-full pt-4 pb-12"><div class="w-full px-4 lg:px-8 max-w-4xl mx-auto"><div class="mb-4"><div class="flex justify-between items-center mb-2"><span class="text-white/60">Вопрос ${quizState.currentQuestion + 1} из ${quizState.questions.length}</span><span class="text-[#00FF94] font-semibold">Счёт: ${quizState.score}</span></div><div class="w-full bg-[#1a3150] rounded-full h-3"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-3 rounded-full" style="width: ${progress}%;"></div></div></div><div class="bg-[#1a3150] border border-white/10 rounded-3xl p-8 lg:p-12 mb-8"><div class="flex flex-col lg:flex-row gap-8 items-start"><div class="flex-1"><h2 class="text-2xl lg:text-3xl font-bold text-white mb-8">${q.question}</h2><div class="space-y-4">${q.options.map((opt, idx) => `<button class="quiz-option w-full p-4 rounded-xl text-left transition-all ${quizState.selectedAnswer === null ? 'bg-white/5 hover:bg-white/10 border-2 border-transparent hover:border-[#00FF94]/50 text-white' : idx === q.correct ? 'bg-[#00FF94]/20 border-2 border-[#00FF94] text-white' : idx === quizState.selectedAnswer ? 'bg-red-500/20 border-2 border-red-500 text-white' : 'bg-white/5 border-2 border-transparent text-white/50'}" onclick="selectQuizAnswer(${idx})" ${quizState.selectedAnswer !== null ? 'disabled' : ''}><div class="flex items-center gap-3">${quizState.selectedAnswer !== null ? (idx === q.correct ? '<i data-lucide="check-circle" class="text-[#00FF94] flex-shrink-0" size="24"></i>' : idx === quizState.selectedAnswer ? '<i data-lucide="x-circle" class="text-red-500 flex-shrink-0" size="24"></i>' : '') : ''}<span class="flex-1">${opt}</span></div></button>`).join('')}</div></div><div class="hidden lg:block lg:w-auto relative flex flex-col items-center mt-40">${quizState.showExplanation ? `<div class="speech-bubble absolute right-0 bottom-full mb-2 z-10" style="right: -200px; min-width: 250px;">${q.explanation}</div>` : ''}${getMascotSVG(quizState.showExplanation ? (quizState.selectedAnswer === q.correct ? 'happy' : 'thinking') : 'pointing', 'w-60 h-60')}</div></div></div>${quizState.showExplanation ? `<div class="flex justify-center"><button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105" onclick="nextQuizQuestion()">${quizState.currentQuestion < quizState.questions.length - 1 ? 'Следующий вопрос' : 'Завершить'}</button></div>` : ''}<div class="lg:hidden mt-8 flex flex-col items-center">${quizState.showExplanation ? `<div class="speech-bubble mb-4" style="max-width: 90%;">${q.explanation}</div>${getMascotSVG(quizState.showExplanation ? (quizState.selectedAnswer === q.correct ? 'happy' : 'thinking') : 'pointing', 'w-48 h-48')}` : ''}</div></div></div>`;
+    }
+    function renderQuizResult() {
+      const percent = (quizState.score / quizState.questions.length) * 100;
+      return `<div class="min-h-screen w-full pt-4 pb-12"><div class="w-full px-4 lg:px-8 max-w-4xl mx-auto"><div class="flex flex-col items-center"><div class="w-full max-w-2xl"><div class="bg-[#1a3150] border border-white/10 rounded-3xl p-8 lg:p-12"><i data-lucide="trophy" class="w-20 h-20 text-[#00FF94] mx-auto mb-6"></i><h1 class="text-4xl lg:text-5xl font-bold text-white text-center mb-4">Квиз завершён!</h1><div class="text-6xl font-bold bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] bg-clip-text text-transparent text-center mb-4">${quizState.score} / ${quizState.questions.length}</div><p class="text-xl text-white/80 text-center mb-8">${percent === 100 ? 'Идеально! Ты настоящий киберэксперт! 🏆' : percent >= 80 ? 'Отлично! Ты хорошо разбираешься в безопасности! 🌟' : percent >= 60 ? 'Хорошо! Но есть куда расти! 💪' : percent >= 40 ? 'Неплохо! Рекомендую пройти материалы ещё раз 📚' : 'Нужно подучиться! Начни с главной страницы 🔄'}</p><div class="w-full bg-[#0B1E33] rounded-full h-4 mb-8"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-4 rounded-full" style="width: ${percent}%;"></div></div><div class="flex flex-col sm:flex-row gap-4 justify-center"><button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="restartQuiz()"><i data-lucide="rotate-ccw" size="20"></i>Пройти снова</button><button class="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 hover:border-[#00FF94]/50 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="goHome()"><i data-lucide="home" size="20"></i>На главную</button></div></div></div><div class="mt-8 flex justify-center">${getMascotSVG('happy', 'w-48 h-48 lg:w-64 lg:h-64')}</div></div></div></div>`;
+    }
+    // ========== ИГРА (полная версия из исходного кода) ==========
+    function renderGame() {
+      const msg = gameState.messages[gameState.currentMessage];
+      if (gameState.currentMessage >= gameState.messages.length) return renderGameResult();
+      let cardHighlightClass = '';
+      if (gameState.showResult) {
+        cardHighlightClass = gameState.selectedAnswer === msg.isScam ? 'border-[#00FF94] bg-[#00FF94]/10' : 'border-red-500 bg-red-500/10';
+      } else {
+        cardHighlightClass = 'border-white/20 bg-transparent';
+      }
+      return `<div class="min-h-screen w-full pt-4 pb-12"><div class="w-full px-4 lg:px-8 max-w-5xl mx-auto"><div class="mb-4"><div class="flex justify-between items-center mb-2"><span class="text-white/60">Сообщение ${gameState.currentMessage + 1} из ${gameState.messages.length}</span><span class="text-[#00FF94] font-semibold">Счёт: ${gameState.score}</span></div><div class="w-full bg-[#1a3150] rounded-full h-3"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-3 rounded-full" style="width: ${((gameState.currentMessage + 1) / gameState.messages.length) * 100}%;"></div></div></div><div class="flex justify-center"><div class="relative"><div class="max-w-md w-full transition-all duration-300"><div class="bg-[#1a3150] border-4 rounded-[2.5rem] p-4 shadow-2xl ${cardHighlightClass}"><div class="bg-[#0B1E33] rounded-t-3xl p-4 mb-2"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#00FF94] to-[#2D7EE7] flex items-center justify-center"><i data-lucide="smartphone" size="20" class="text-[#0B1E33]"></i></div><div class="flex-1"><div class="text-white font-semibold">${msg.from}</div>${msg.subject ? `<div class="text-white/60 text-sm">${msg.subject}</div>` : ''}<div class="text-white/40 text-xs">${msg.type === 'sms' ? 'SMS' : 'Email'}</div></div></div></div><div class="bg-white/5 rounded-2xl p-6 min-h-[250px]"><p class="text-white whitespace-pre-line leading-relaxed">${msg.message}</p></div></div>${!gameState.showResult ? `<div class="flex flex-col sm:flex-row gap-4 justify-center mt-8"><button class="px-8 py-4 bg-red-500/20 border-2 border-red-500 text-white rounded-xl font-semibold hover:bg-red-500/30 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="selectGameAnswer(true)"><i data-lucide="alert-triangle" size="20"></i>Это мошенники</button><button class="px-8 py-4 bg-[#00FF94]/20 border-2 border-[#00FF94] text-white rounded-xl font-semibold hover:bg-[#00FF94]/30 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="selectGameAnswer(false)"><i data-lucide="check-circle" size="20"></i>Всё нормально</button></div>` : ''}${gameState.showResult ? `<div class="flex justify-center mt-8"><button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105" onclick="nextGameMessage()">${gameState.currentMessage < gameState.messages.length - 1 ? 'Следующее сообщение' : 'Завершить'}</button></div>` : ''}</div><div class="hidden lg:block absolute left-full top-1/2 transform -translate-y-1/2 ml-4">${gameState.showResult ? `<div class="speech-bubble game-bubble" style="top: -90px; left: 85%;">${msg.explanation}</div>` : ''}${getMascotSVG(gameState.showResult ? (gameState.selectedAnswer === msg.isScam ? 'happy' : 'thinking') : 'pointing', 'w-60 h-60')}</div></div></div><div class="lg:hidden mt-8 flex flex-col items-center">${gameState.showResult ? `<div class="speech-bubble mb-4" style="max-width: 90%;">${msg.explanation}</div>${getMascotSVG(gameState.showResult ? (gameState.selectedAnswer === msg.isScam ? 'happy' : 'thinking') : 'pointing', 'w-48 h-48')}` : ''}</div></div></div>`;
+    }
+    function renderGameResult() {
+      const percent = (gameState.score / gameState.messages.length) * 100;
+      return `<div class="min-h-screen w-full pt-4 pb-12"><div class="w-full px-4 lg:px-8 max-w-2xl mx-auto text-center">${getMascotSVG('happy', 'w-40 h-40 mx-auto mb-8')}<div class="bg-[#1a3150] border border-white/10 rounded-3xl p-8 lg:p-12 mb-8"><i data-lucide="alert-triangle" class="w-20 h-20 text-[#00FF94] mx-auto mb-6"></i><h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">Детектив завершён!</h1><div class="text-6xl font-bold bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] bg-clip-text text-transparent mb-4">${gameState.score} / ${gameState.messages.length}</div><p class="text-xl text-white/80 mb-8">${percent === 100 ? 'Идеально! Ты — настоящий детектив мошенничества! 🕵️' : percent >= 75 ? 'Отлично! Мошенникам будет сложно тебя обмануть! 🌟' : percent >= 50 ? 'Хорошо! Но будь внимательнее! 👀' : 'Нужно быть осторожнее! Пройди ещё раз! 🔄'}</p><div class="w-full bg-[#0B1E33] rounded-full h-4 mb-8"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-4 rounded-full" style="width: ${percent}%;"></div></div></div><div class="flex flex-col sm:flex-row gap-4 justify-center"><button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="restartGame()"><i data-lucide="rotate-ccw" size="20"></i>Пройти снова</button><button class="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 hover:border-[#00FF94]/50 transition-all hover:scale-105 flex items-center justify-center gap-2" onclick="goHome()"><i data-lucide="home" size="20"></i>На главную</button></div></div></div>`;
+    }
 
     function updateActiveNav() {
       const navItems = document.querySelectorAll('[data-nav]');
