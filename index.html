@@ -175,68 +175,25 @@
       border-radius: 4px;
     }
 
-    /* ========== ИНТЕРНЕТ (компактная 3D сеть) ========== */
-    .internet-3d-scene {
-      perspective: 1000px;
+    /* ========== ИНТЕРНЕТ (новая 3D сцена) ========== */
+    .internet-fullscreen {
+      height: calc(100vh - 5rem);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .scene-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      perspective: 1200px;
       perspective-origin: 50% 50%;
-      width: 100%;
-      min-height: 500px;
-      position: relative;
-      overflow: visible;
     }
-    .internet-camera {
-      width: 100%;
-      height: 100%;
+    .scene-camera {
+      position: absolute;
+      inset: 0;
       transform-style: preserve-3d;
-      transition: transform 1s cubic-bezier(0.23, 1, 0.32, 1);
-      position: relative;
-      min-height: 500px;
-    }
-    .internet-node {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform-style: preserve-3d;
-    }
-    .node-sphere {
-      width: 16px;
-      height: 16px;
-      background: radial-gradient(circle at 30% 30%, #00FF94, #2D7EE7);
-      border-radius: 50%;
-      box-shadow: 0 0 15px #00FF94;
-      position: absolute;
-      left: -8px;
-      top: -8px;
-    }
-    .internet-card-wrapper {
-      position: absolute;
-      left: -160px;
-      top: -180px;
-      width: 320px;
-      opacity: 0;
-      transform: scale(0.8);
-      transition: opacity 0.4s, transform 0.4s;
-      pointer-events: none;
-    }
-    .internet-node.active .internet-card-wrapper {
-      opacity: 1;
-      transform: scale(1);
-      pointer-events: auto;
-    }
-    .internet-card-node {
-      background: linear-gradient(145deg, #1a3150, #0B1E33);
-      border-radius: 1.5rem;
-      padding: 1rem;
-      border: 1px solid rgba(0,255,148,0.5);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.4), 0 0 20px rgba(0,255,148,0.2);
-    }
-    .internet-lines {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
+      transition: transform 1.2s cubic-bezier(0.23, 1, 0.32, 1);
     }
   </style>
 </head>
@@ -285,6 +242,7 @@
     let quizState = { currentQuestion: 0, selectedAnswer: null, showExplanation: false, score: 0, questions: [] };
     let gameState = { currentMessage: 0, selectedAnswer: null, showResult: false, score: 0, messages: [] };
     let internetNodesPositions = [];
+    let internetConnections = [];
 
     async function loadData() {
       try {
@@ -337,7 +295,7 @@
       const rows = [];
       const rowMatches = tableHtml.match(/<tr[\s\S]*?<\/tr>/gi);
       if (rowMatches) {
-        for (let i = 1; i < rowMatches.length; i++) { // пропускаем заголовок
+        for (let i = 1; i < rowMatches.length; i++) {
           const cells = rowMatches[i].match(/<td[\s\S]*?<\/td>/gi);
           if (cells && cells.length >= 4) {
             const method = cells[0].replace(/<\/?td>/gi, '').trim();
@@ -354,13 +312,12 @@
       return html;
     }
 
-    // ---------- ТЕЛЕФОН (с преобразованием таблицы) ----------
+    // ---------- ТЕЛЕФОН ----------
     function renderPhone() {
       const steps = phoneSteps;
       const step = steps[learningStep];
       const isLast = learningStep === steps.length - 1;
       let contentHtml = step.content;
-      // Если есть таблица – преобразуем в блоки
       contentHtml = convertTableToList(contentHtml);
       return `
         <div class="w-full px-4 lg:px-8 max-w-4xl mx-auto">
@@ -399,7 +356,7 @@
       `;
     }
 
-    // ---------- КОМПЬЮТЕР (расширенный) ----------
+    // ---------- КОМПЬЮТЕР ----------
     function renderComputer() {
       const steps = computerSteps;
       const step = steps[learningStep];
@@ -421,67 +378,204 @@
       `;
     }
 
-    // ---------- ИНТЕРНЕТ (компактная 3D сеть) ----------
-    let internetCamera = null;
+    // ---------- ИНТЕРНЕТ (НОВАЯ ВЕРСИЯ) ----------
     function renderInternet() {
       const steps = internetSteps;
-      // Уменьшенные позиции узлов, чтобы помещались в экран
-      const nodes = steps.map((_, i) => {
-        if (i === 0) return { x: 0, y: 0, z: 0 };
-        if (i === 1) return { x: 280, y: -140, z: -200 };
-        if (i === 2) return { x: -220, y: 140, z: -180 };
-        return { x: 240, y: 180, z: -280 };
-      });
-      internetNodesPositions = nodes;
-      const cameraX = -nodes[learningStep].x;
-      const cameraY = -nodes[learningStep].y;
-      const cameraZ = -nodes[learningStep].z + 400;
-      const lines = [];
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i+1; j < nodes.length; j++) {
-          lines.push({ from: i, to: j });
-        }
+      const count = steps.length;
+      
+      // Генерация позиций узлов по эллиптической спирали
+      const positions = [];
+      const radiusX = 380, radiusY = 250, depthStart = -300, depthStep = 60;
+      for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+        const x = Math.cos(angle) * radiusX;
+        const y = Math.sin(angle) * radiusY;
+        const z = depthStart + i * depthStep;
+        positions.push({ x, y, z });
       }
+      internetNodesPositions = positions;
+
+      // Генерация соединений
+      const connections = [];
+      for (let i = 0; i < count; i++) {
+        const next1 = (i + 1) % count;
+        const next2 = (i + 2) % count;
+        const prev = (i - 1 + count) % count;
+        connections.push({ from: i, to: next1, layer: 'front' });
+        connections.push({ from: i, to: next2, layer: 'back' });
+        if (i % 2 === 0) connections.push({ from: i, to: prev, layer: 'back' });
+      }
+      internetConnections = connections;
+
+      const currentPos = positions[learningStep];
+      const cameraX = -currentPos.x;
+      const cameraY = -currentPos.y;
+      const cameraZ = -currentPos.z + 600;
+
       return `
-        <div class="w-full px-4 lg:px-8 max-w-6xl mx-auto">
-          <div class="text-center mb-2">
-            <div class="flex justify-between items-center text-white/60 text-sm mb-1"><span>Узел ${learningStep+1} из ${steps.length}</span><button class="hover:text-[#00FF94]" onclick="goBack()">← Назад</button></div>
-            <div class="w-full bg-[#1a3150] rounded-full h-2"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-2 rounded-full" style="width: ${((learningStep+1)/steps.length)*100}%;"></div></div>
-          </div>
-          <div class="internet-3d-scene" style="overflow: visible; min-height: 460px;">
-            <div class="internet-camera" id="internetCamera" style="transform: translate3d(${cameraX}px, ${cameraY}px, ${cameraZ}px);">
-              <svg class="internet-lines" style="position: absolute; width: 100%; height: 100%; pointer-events: none;">
-                <defs><linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs>
-                ${lines.map(line => {
-                  const from = nodes[line.from];
-                  const to = nodes[line.to];
-                  return `<line x1="${from.x+400}" y1="${from.y+230}" x2="${to.x+400}" y2="${to.y+230}" stroke="url(#lineGradient)" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.5" />`;
-                }).join('')}
-              </svg>
-              ${nodes.map((node, idx) => `
-                <div class="internet-node ${idx === learningStep ? 'active' : ''}" style="transform: translate3d(${node.x}px, ${node.y}px, ${node.z}px);">
-                  <div class="node-sphere"></div>
-                  <div class="internet-card-wrapper">
-                    <div class="internet-card-node">
-                      <div class="flex items-center gap-3 mb-2">
-                        <div class="p-2 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-xl"><i data-lucide="${steps[idx].icon}" class="w-5 h-5 text-[#00FF94]"></i></div>
-                        <div><div class="text-lg">🌐</div><h3 class="text-white font-bold text-sm">${steps[idx].title}</h3></div>
-                      </div>
-                      <div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 rounded-lg p-2 mb-2"><p class="text-white text-xs text-center">${steps[idx].content.split('•')[0]}</p></div>
-                      <div class="space-y-1">${steps[idx].content.split('<br>').filter(p=>p.includes('•')).slice(0,3).map(p=>`<div class="flex items-start gap-2 bg-white/5 rounded-lg p-2"><i data-lucide="globe" class="w-3 h-3 text-[#00FF94] mt-0.5"></i><span class="text-white/80 text-xs">${p.replace('•','').trim()}</span></div>`).join('')}</div>
-                      <div class="mt-2 bg-[#0B1E33] rounded-lg p-2 flex items-center gap-2"><div class="w-6 h-6">${getMascotSVG('winking', 'w-6 h-6')}</div><p class="text-[#00FF94] text-xs">💡 ${steps[idx].title.includes('VPN')?'Бесплатные VPN продают данные':steps[idx].title.includes('Коды')?'Никому не сообщайте код':'Всегда проверяйте ссылки'}</p></div>
-                    </div>
-                  </div>
-                </div>
-              `).join('')}
+        <div class="internet-fullscreen w-full">
+          <div class="w-full px-6 py-3 flex-shrink-0 z-30">
+            <div class="flex justify-between items-center text-white/60 text-sm">
+              <button class="hover:text-[#00FF94] transition-colors flex items-center gap-1" onclick="goBack()">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Назад
+              </button>
+              <span>Узел ${learningStep+1} из ${steps.length}</span>
+              <div class="w-20"></div>
+            </div>
+            <div class="w-full bg-[#1a3150] rounded-full h-1.5 mt-1">
+              <div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-1.5 rounded-full transition-all duration-500" style="width: ${((learningStep+1)/steps.length)*100}%;"></div>
             </div>
           </div>
-          <div class="flex justify-center gap-4 mt-6">
-            ${learningStep>0 ? '<button class="px-6 py-3 bg-white/10 border border-white/20 rounded-xl text-base font-semibold text-white hover:bg-[#2D7EE7] transition-all" onclick="prevStep()"><i data-lucide="arrow-left" class="inline mr-2"></i>Назад</button>' : ''}
-            ${learningStep < steps.length-1 ? '<button class="px-6 py-3 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-base font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="nextStep()">Далее <i data-lucide="arrow-right" class="inline ml-2"></i></button>' : '<button class="px-6 py-3 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-base font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="finishLearning()">Завершить</button>'}
+
+          <div class="scene-container">
+            <div class="scene-camera" id="internetScene" style="transform: translate3d(${cameraX}px, ${cameraY}px, ${cameraZ}px);">
+              
+              <!-- Фоновые сетки для глубины -->
+              <div class="absolute inset-0" style="transform-style: preserve-3d;">
+                ${[-800,-600,-400,-200,0,200,400,600,800].map(z => `
+                  <div class="absolute" style="width:2000px; height:1px; left:-1000px; top:50%; background:linear-gradient(90deg, transparent, rgba(0,255,148,0.1), transparent); transform: translate3d(0,0,${z}px);"></div>
+                  <div class="absolute" style="width:1px; height:2000px; left:50%; top:-1000px; background:linear-gradient(180deg, transparent, rgba(45,126,231,0.1), transparent); transform: translate3d(0,0,${z}px);"></div>
+                `).join('')}
+              </div>
+
+              <!-- Линии соединений - задний слой -->
+              <svg class="absolute" style="width:2000px; height:2000px; left:-1000px; top:-1000px; transform: translateZ(-100px); pointer-events:none;" id="internetLinesBack">
+                <defs>
+                  <linearGradient id="lineGradBack" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#00FF94" stop-opacity="0.2"/>
+                    <stop offset="100%" stop-color="#2D7EE7" stop-opacity="0.2"/>
+                  </linearGradient>
+                </defs>
+                ${internetConnections.filter(c => c.layer === 'back').map((c, idx) => {
+                  const from = positions[c.from], to = positions[c.to];
+                  return `<line x1="${1000+from.x}" y1="${1000+from.y}" x2="${1000+to.x}" y2="${1000+to.y}" stroke="url(#lineGradBack)" stroke-width="1.5" stroke-dasharray="4 6" class="connection-line" data-from="${c.from}" data-to="${c.to}" style="opacity:0.3;"/>`;
+                }).join('')}
+              </svg>
+
+              <!-- Линии соединений - передний слой -->
+              <svg class="absolute" style="width:2000px; height:2000px; left:-1000px; top:-1000px; transform: translateZ(50px); pointer-events:none;" id="internetLinesFront">
+                <defs>
+                  <linearGradient id="lineGradFront" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#00FF94" stop-opacity="0.7"/>
+                    <stop offset="100%" stop-color="#2D7EE7" stop-opacity="0.9"/>
+                  </linearGradient>
+                  <filter id="glow"><feGaussianBlur stdDeviation="2"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                </defs>
+                ${internetConnections.filter(c => c.layer === 'front').map((c, idx) => {
+                  const from = positions[c.from], to = positions[c.to];
+                  const isActive = (c.from === learningStep || c.to === learningStep);
+                  return `<line x1="${1000+from.x}" y1="${1000+from.y}" x2="${1000+to.x}" y2="${1000+to.y}" stroke="url(#lineGradFront)" stroke-width="${isActive ? 3 : 2}" filter="url(#glow)" class="connection-line" data-from="${c.from}" data-to="${c.to}" style="opacity:${isActive ? 0.9 : 0.5}; transition: all 0.5s;"/>`;
+                }).join('')}
+              </svg>
+
+              <!-- Узлы и карточки -->
+              ${steps.map((step, idx) => {
+                const pos = positions[idx];
+                const isActive = idx === learningStep;
+                return `
+                  <div class="absolute" style="transform: translate3d(${pos.x}px, ${pos.y}px, ${pos.z}px); left:50%; top:50%; margin-left:-20px; margin-top:-20px; transform-style: preserve-3d;">
+                    <div class="absolute rounded-full blur-2xl transition-all duration-500" style="width:120px; height:120px; left:-40px; top:-40px; background: radial-gradient(circle, ${isActive ? '#00FF94' : '#2D7EE7'}80, transparent); opacity: ${isActive ? 0.6 : 0.2};"></div>
+                    <div class="absolute rounded-full transition-all duration-500" style="width:40px; height:40px; left:0; top:0; background: radial-gradient(circle at 30% 30%, #00FF94, #2D7EE7); box-shadow: 0 0 30px ${isActive ? '#00FF94' : '#2D7EE7'}; transform: scale(${isActive ? 1.2 : 0.9}); border: 2px solid ${isActive ? '#00FF94' : '#2D7EE7'};"></div>
+                    
+                    ${isActive ? `
+                      <div class="absolute" style="left:-250px; top:-220px; width:500px; transform: translateZ(50px); opacity:1; transition: opacity 0.4s;">
+                        <div class="bg-gradient-to-br from-[#1a3150] to-[#0B1E33] border-2 rounded-3xl p-6 shadow-2xl" style="border-color: #00FF94; box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 30px #00FF9440;">
+                          <div class="flex items-center gap-3 mb-4">
+                            <div class="p-3 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-2xl border border-[#00FF94]/30">
+                              <i data-lucide="${step.icon}" class="w-6 h-6 text-[#00FF94]"></i>
+                            </div>
+                            <div class="flex-1">
+                              <div class="text-2xl mb-1">🌐</div>
+                              <h3 class="text-white font-bold text-xl">${step.title}</h3>
+                            </div>
+                          </div>
+                          <div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 rounded-2xl p-3 mb-4 border border-[#00FF94]/30">
+                            <p class="text-white font-bold text-center">${step.content.split('•')[0].trim()}</p>
+                          </div>
+                          <div class="space-y-2 mb-4">
+                            ${step.content.split('<br>').filter(p => p.includes('•')).slice(0,4).map(p => `
+                              <div class="flex items-start gap-2 bg-white/5 rounded-xl p-2 border border-white/10">
+                                <i data-lucide="shield" class="w-4 h-4 text-[#00FF94] mt-0.5"></i>
+                                <span class="text-white/90 text-sm">${p.replace('•','').trim()}</span>
+                              </div>
+                            `).join('')}
+                          </div>
+                          <div class="bg-[#0B1E33] rounded-2xl p-3 flex items-center gap-2 border border-[#00FF94]/30">
+                            ${getMascotSVG('winking', 'w-8 h-8 flex-shrink-0')}
+                            <p class="text-sm text-[#00FF94]">💡 ${step.title.includes('VPN')?'Бесплатные VPN продают данные':step.title.includes('Коды')?'Никому не сообщайте код':'Всегда проверяйте ссылки'}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ` : ''}
+                  </div>
+                `;
+              }).join('')}
+
+              <!-- Частицы -->
+              ${[...Array(20)].map((_, i) => {
+                const x = (Math.random() - 0.5) * 1600;
+                const y = (Math.random() - 0.5) * 1600;
+                const z = (Math.random() - 0.5) * 800;
+                return `<div class="absolute w-1 h-1 rounded-full bg-[#00FF94] animate-pulse" style="left:50%; top:50%; transform: translate3d(${x}px, ${y}px, ${z}px); opacity:0.6;"></div>`;
+              }).join('')}
+            </div>
+
+            <!-- Боковые кнопки навигации -->
+            <div class="absolute top-1/2 -translate-y-1/2 left-4 right-4 flex justify-between z-40 pointer-events-none">
+              <button class="w-12 h-12 rounded-full bg-gradient-to-br from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] flex items-center justify-center shadow-xl hover:scale-110 transition-transform pointer-events-auto ${learningStep === 0 ? 'opacity-50 pointer-events-none' : ''}" onclick="prevStep()" ${learningStep === 0 ? 'disabled' : ''}>
+                <i data-lucide="chevron-left" class="w-6 h-6"></i>
+              </button>
+              <button class="w-12 h-12 rounded-full bg-gradient-to-br from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] flex items-center justify-center shadow-xl hover:scale-110 transition-transform pointer-events-auto ${learningStep === steps.length-1 ? 'opacity-50 pointer-events-none' : ''}" onclick="nextStep()" ${learningStep === steps.length-1 ? 'disabled' : ''}>
+                <i data-lucide="chevron-right" class="w-6 h-6"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Индикатор точек и нижний блок -->
+          <div class="flex-shrink-0 px-6 pb-4 z-30">
+            <div class="flex justify-center gap-2 mb-4">
+              ${steps.map((_, idx) => `
+                <button class="h-2 rounded-full transition-all ${idx === learningStep ? 'w-8 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7]' : 'w-2 bg-white/30 hover:bg-white/50'}" onclick="setInternetStep(${idx})"></button>
+              `).join('')}
+            </div>
+            <div class="bg-gradient-to-br from-[#1a3150] to-[#0B1E33] border border-[#00FF94]/20 rounded-3xl p-4 max-w-2xl mx-auto">
+              <h3 class="text-lg font-bold text-white text-center mb-3">Готов проверить свои знания?</h3>
+              <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button class="px-6 py-2 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="navigateTo('quiz')">Пройти квиз</button>
+                <button class="px-6 py-2 bg-white/10 text-white rounded-xl font-semibold border border-white/20 hover:bg-white/20 hover:border-[#00FF94]/50 transition-all" onclick="navigateTo('game')">Найти мошенника</button>
+              </div>
+            </div>
           </div>
         </div>
       `;
+    }
+
+    // Вспомогательная функция для установки шага по клику на точку
+    window.setInternetStep = function(step) {
+      if (step === learningStep) return;
+      stopSpeech();
+      learningStep = step;
+      renderScreen();
+      setTimeout(() => {
+        updateInternetCamera();
+        triggerNetworkTransition();
+      }, 50);
+    };
+
+    function updateInternetCamera() {
+      if (currentTopic !== 'internet') return;
+      const scene = document.getElementById('internetScene');
+      if (!scene || !internetNodesPositions.length) return;
+      const pos = internetNodesPositions[learningStep];
+      scene.style.transform = `translate3d(${-pos.x}px, ${-pos.y}px, ${-pos.z + 600}px)`;
+      
+      document.querySelectorAll('.connection-line').forEach(line => {
+        const from = parseInt(line.dataset.from);
+        const to = parseInt(line.dataset.to);
+        const isActive = (from === learningStep || to === learningStep);
+        line.style.opacity = isActive ? '0.9' : '0.3';
+        line.setAttribute('stroke-width', isActive ? '3' : '1.5');
+      });
     }
 
     function renderLearning() {
@@ -503,16 +597,7 @@
       window.addEventListener('mouseup', (e) => { if (!mouseDown) return; const diff = e.clientX - mouseStartX; if (Math.abs(diff) > 50) diff > 0 ? prevStep() : nextStep(); mouseDown = false; card.style.cursor = 'grab'; });
     }
 
-    function updateInternetCamera() {
-      if (currentTopic !== 'internet') return;
-      const camera = document.getElementById('internetCamera');
-      if (!camera || !internetNodesPositions.length) return;
-      const pos = internetNodesPositions[learningStep];
-      camera.style.transform = `translate3d(${-pos.x}px, ${-pos.y}px, ${-pos.z + 400}px)`;
-      document.querySelectorAll('.internet-node').forEach((node, i) => { if (i === learningStep) node.classList.add('active'); else node.classList.remove('active'); });
-    }
-
-    // Квиз и игра (полные версии, без изменений)
+    // Квиз и игра (без изменений)
     function renderQuiz() {
       const q = quizState.questions[quizState.currentQuestion];
       const progress = ((quizState.currentQuestion + 1) / quizState.questions.length) * 100;
