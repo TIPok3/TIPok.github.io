@@ -46,11 +46,10 @@
     .speech-bubble { position: relative; background: #00FF94; border-radius: 20px; padding: 12px 18px; color: #0B1E33; font-weight: 500; max-width: 400px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 20px; }
     .speech-bubble:after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 12px solid #00FF94; }
 
-    /* Фоновая сеть (canvas) */
     #networkCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.6; }
     .relative { z-index: 2; }
 
-    /* ========== ТЕЛЕФОН ========== */
+    /* Телефон */
     .phone-frame {
       background: linear-gradient(145deg, #1a1a2e, #0f0f1a);
       border-radius: 3rem;
@@ -109,7 +108,7 @@
     .card-enter { animation: cardFadeIn 0.4s ease-out; }
     @keyframes cardFadeIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
 
-    /* ========== КОМПЬЮТЕР (расширенный) ========== */
+    /* Компьютер */
     .computer-monitor {
       background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
       border-radius: 1.5rem 1.5rem 0.5rem 0.5rem;
@@ -175,26 +174,99 @@
       border-radius: 4px;
     }
 
-    /* ========== ИНТЕРНЕТ (новая 3D сцена) ========== */
-    .internet-fullscreen {
+    /* Интернет – новая 3D сцена */
+    .internet-scene {
+      position: relative;
+      width: 100%;
       height: calc(100vh - 5rem);
-      display: flex;
-      flex-direction: column;
       overflow: hidden;
     }
-    .scene-container {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-      perspective: 1200px;
+    .internet-canvas-3d {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      perspective: 1000px;
       perspective-origin: 50% 50%;
     }
-    .scene-camera {
+    .internet-camera {
       position: absolute;
-      inset: 0;
+      width: 100%;
+      height: 100%;
       transform-style: preserve-3d;
-      transition: transform 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+      transition: transform 1s cubic-bezier(0.23, 1, 0.32, 1);
+      will-change: transform;
     }
+    .internet-node {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform-style: preserve-3d;
+      pointer-events: none;
+    }
+    .node-sphere {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #00FF94, #2D7EE7);
+      box-shadow: 0 0 20px currentColor;
+      position: absolute;
+      left: -10px;
+      top: -10px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    .internet-node.active .node-sphere {
+      transform: scale(1.3);
+      box-shadow: 0 0 30px #00FF94;
+    }
+    .internet-lines-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      transform-style: preserve-3d;
+    }
+    /* Карточка по центру */
+    .internet-card-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 500px;
+      z-index: 50;
+      pointer-events: none;
+    }
+    .internet-card {
+      background: linear-gradient(145deg, #1a3150, #0B1E33);
+      border: 2px solid #00FF94;
+      border-radius: 2rem;
+      padding: 1.5rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 30px #00FF9440;
+      pointer-events: auto;
+      backdrop-filter: blur(4px);
+    }
+    .nav-arrow {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00FF94, #2D7EE7);
+      color: #0B1E33;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    .nav-arrow:hover { transform: scale(1.1); box-shadow: 0 0 20px #00FF94; }
+    .nav-arrow.disabled { opacity: 0.3; pointer-events: none; }
   </style>
 </head>
 <body>
@@ -217,19 +289,18 @@
   <script>
     lucide.createIcons();
 
-    // Фоновая сеть (canvas)
+    // Фоновая сеть
     const canvas = document.getElementById('networkCanvas');
     let ctx = canvas.getContext('2d');
     let width = window.innerWidth, height = window.innerHeight;
     let points = [];
     let stepTransition = 0;
-    let animFrame = null;
     function initPoints() { const count = Math.floor((width * height) / 8000); points = []; for (let i = 0; i < count; i++) points.push({ x: Math.random() * width, y: Math.random() * height, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3, radius: 1 + Math.random() * 2, phase: Math.random() * Math.PI * 2 }); }
     function resizeCanvas() { width = window.innerWidth; height = window.innerHeight; canvas.width = width; canvas.height = height; initPoints(); }
     function drawNetwork(transition = 0) { if (!ctx) return; ctx.clearRect(0, 0, width, height); ctx.fillStyle = '#0B1E33'; ctx.fillRect(0, 0, width, height); const maxDist = 150; for (let i = 0; i < points.length; i++) { for (let j = i+1; j < points.length; j++) { const dx = points[i].x - points[j].x, dy = points[i].y - points[j].y, dist = Math.hypot(dx, dy); if (dist < maxDist) { const opacity = (1 - dist/maxDist) * 0.3 * (0.8 + transition * 0.4); ctx.beginPath(); ctx.moveTo(points[i].x, points[i].y); ctx.lineTo(points[j].x, points[j].y); ctx.strokeStyle = `rgba(0, 255, 148, ${opacity})`; ctx.lineWidth = 0.8; ctx.stroke(); } } } for (const p of points) { const glow = 2 + Math.sin(Date.now() * 0.002 + p.phase) * 1.5; ctx.beginPath(); ctx.arc(p.x, p.y, p.radius + transition * 0.5, 0, Math.PI*2); ctx.fillStyle = `rgba(0, 255, 148, 0.8)`; ctx.fill(); ctx.beginPath(); ctx.arc(p.x, p.y, p.radius + glow * 0.3, 0, Math.PI*2); ctx.fillStyle = `rgba(0, 255, 148, 0.3)`; ctx.fill(); } }
     function updatePoints() { for (const p of points) { p.x += p.vx; p.y += p.vy; if (p.x < 0) p.x = width; if (p.x > width) p.x = 0; if (p.y < 0) p.y = height; if (p.y > height) p.y = 0; } }
-    function animate() { if (!canvas.isConnected) return; updatePoints(); if (stepTransition > 0) stepTransition -= 0.02; else stepTransition = 0; drawNetwork(stepTransition); animFrame = requestAnimationFrame(animate); }
-    function triggerNetworkTransition() { stepTransition = 0.8; for (const p of points) { p.vx += (Math.random() - 0.5) * 0.5; p.vy += (Math.random() - 0.5) * 0.5; const maxSpeed = 1.2; if (Math.abs(p.vx) > maxSpeed) p.vx = p.vx > 0 ? maxSpeed : -maxSpeed; if (Math.abs(p.vy) > maxSpeed) p.vy = p.vy > 0 ? maxSpeed : -maxSpeed; } }
+    function animate() { if (!canvas.isConnected) return; updatePoints(); if (stepTransition > 0) stepTransition -= 0.02; else stepTransition = 0; drawNetwork(stepTransition); requestAnimationFrame(animate); }
+    function triggerNetworkTransition() { stepTransition = 0.8; for (const p of points) { p.vx += (Math.random() - 0.5) * 0.5; p.vy += (Math.random() - 0.5) * 0.5; } }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
     animate();
@@ -254,7 +325,7 @@
         quizState.questions = data.quizQuestions;
         gameState.messages = data.gameMessages;
         renderScreen();
-      } catch(e) { console.error('Ошибка загрузки данных:', e); alert('Не удалось загрузить данные. Проверьте data.json'); }
+      } catch(e) { console.error('Ошибка загрузки данных:', e); }
     }
 
     function getMascotSVG(variant = 'happy', className = 'w-20 h-20') {
@@ -271,11 +342,10 @@
     }
 
     let currentSpeakingStepId = null;
-    function speakText(text) { if (!window.speechSynthesis) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang='ru-RU'; u.rate=0.9; u.onend=()=>currentSpeakingStepId=null; u.onerror=()=>currentSpeakingStepId=null; window.speechSynthesis.speak(u); }
-    function stopSpeech() { if(window.speechSynthesis) window.speechSynthesis.cancel(); currentSpeakingStepId=null; }
-    window.speakCurrentStep = function() { let steps; if(currentTopic==='phone') steps=phoneSteps; else if(currentTopic==='internet') steps=internetSteps; else steps=computerSteps; const step=steps[learningStep]; const stepId=currentTopic+'_'+learningStep; if(currentSpeakingStepId===stepId) { stopSpeech(); return; } stopSpeech(); currentSpeakingStepId=stepId; const plain=step.content.replace(/<[^>]*>/g,''); speakText(step.title+'. '+plain); };
+    function speakText(text) { if (!window.speechSynthesis) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang='ru-RU'; u.rate=0.9; u.onend=()=>currentSpeakingStepId=null; window.speechSynthesis.speak(u); }
+    function stopSpeech() { if(window.speechSynthesis) window.speechSynthesis.cancel(); }
 
-    // ========== СТРАНИЦЫ ==========
+    // ========== РЕНДЕРИНГ СТРАНИЦ ==========
     function renderHome() {
       return `<div class="min-h-screen w-full flex items-center justify-center"><div class="w-full px-4 lg:px-8 max-w-6xl mx-auto"><div class="grid lg:grid-cols-2 gap-12 items-center"><div class="text-center lg:text-left"><h1 class="text-5xl lg:text-7xl font-bold mb-6 py-2"><span class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] bg-clip-text text-transparent">Проверь свою киберсилу! </span><span>🔥</span></h1><p class="text-xl lg:text-2xl text-white/80 mb-8 leading-relaxed">Всего 30 минут — и ты научишься защищать телефон, компьютер и личные данные от мошенников. Играй и узнавай!</p><div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"><button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105" onclick="navigateTo('topicSelect')">Пройти обучение</button><button class="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold text-lg border border-white/20 hover:bg-white/20 hover:border-[#00FF94]/50 transition-all hover:scale-105" onclick="navigateTo('checkSelect')">Проверить знания</button></div></div><div class="flex justify-center"><div class="relative">${getMascotSVG('pointing', 'w-64 h-64 lg:w-96 lg:h-96')}<div class="absolute -z-10 inset-0 bg-gradient-to-br from-[#00FF94]/30 to-[#2D7EE7]/30 blur-3xl animate-pulse"></div></div></div></div></div></div>`;
     }
@@ -286,7 +356,6 @@
       return `<div class="min-h-screen w-full flex items-start justify-center pt-16"><div class="w-full px-4 lg:px-8 max-w-6xl mx-auto"><h2 class="text-4xl lg:text-5xl font-bold text-white text-center mb-10">Что будем проверять?</h2><div class="flex flex-col md:flex-row items-center justify-center gap-8"><div class="topic-card"><div class="w-40 h-40 topic-figure relative"><svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl relative z-10"><defs><linearGradient id="gradBulb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs><ellipse cx="60" cy="55" rx="25" ry="32" fill="url(#gradBulb)" stroke="#0B1E33" stroke-width="3"/><rect x="52" y="82" width="16" height="15" rx="4" fill="#2D7EE7" stroke="#0B1E33" stroke-width="2"/><line x1="60" y1="82" x2="60" y2="72" stroke="#0B1E33" stroke-width="2"/><path class="bulb-filament" d="M50 45 Q60 35 70 45" stroke="#666" stroke-width="3" fill="none"/></svg><div class="bulb-glow absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-all duration-300" style="background: radial-gradient(circle at center, rgba(255,215,0,0.6) 0%, rgba(255,215,0,0) 70%); filter: blur(12px);"></div></div><button class="topic-button" onclick="navigateTo('quiz')">Квиз</button></div><div class="topic-card"><div class="w-40 h-40 topic-figure"><svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl"><defs><linearGradient id="gradMask" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs><path d="M30 30 Q60 15 90 30 L90 75 Q60 95 30 75 Z" fill="#1a2a3a" stroke="#0B1E33" stroke-width="3"/><ellipse cx="45" cy="55" rx="10" ry="7" fill="white" stroke="#0B1E33" stroke-width="2"/><ellipse cx="75" cy="55" rx="10" ry="7" fill="white" stroke="#0B1E33" stroke-width="2"/><circle cx="42" cy="53" r="4" fill="#0B1E33"/><circle cx="78" cy="53" r="4" fill="#0B1E33"/><circle cx="25" cy="90" r="18" fill="none" stroke="#0B1E33" stroke-width="4"/><line x1="15" y1="80" x2="35" y2="100" stroke="#0B1E33" stroke-width="2"/><line x1="35" y1="80" x2="15" y2="100" stroke="#0B1E33" stroke-width="2"/><path d="M38 102 Q45 110 55 108" stroke="#0B1E33" stroke-width="5" fill="none" stroke-linecap="round"/></svg></div><button class="topic-button" onclick="navigateTo('game')">Найди мошенника</button></div></div></div></div>`;
     }
 
-    // Утилита: преобразовать таблицу в список (для телефона)
     function convertTableToList(html) {
       if (!html.includes('<table')) return html;
       const tableMatch = html.match(/<table[\s\S]*?<\/table>/i);
@@ -306,13 +375,9 @@
           }
         }
       }
-      if (rows.length) {
-        return html.replace(tableHtml, `<div class="space-y-2">${rows.join('')}</div>`);
-      }
-      return html;
+      return rows.length ? html.replace(tableHtml, `<div class="space-y-2">${rows.join('')}</div>`) : html;
     }
 
-    // ---------- ТЕЛЕФОН ----------
     function renderPhone() {
       const steps = phoneSteps;
       const step = steps[learningStep];
@@ -356,7 +421,6 @@
       `;
     }
 
-    // ---------- КОМПЬЮТЕР ----------
     function renderComputer() {
       const steps = computerSteps;
       const step = steps[learningStep];
@@ -378,47 +442,45 @@
       `;
     }
 
-    // ---------- ИНТЕРНЕТ (НОВАЯ ВЕРСИЯ) ----------
+    // ---------- НОВАЯ ВЕРСИЯ ИНТЕРНЕТА ----------
     function renderInternet() {
       const steps = internetSteps;
       const count = steps.length;
       
-      // Генерация позиций узлов по эллиптической спирали
+      // Генерация позиций (кольцо)
       const positions = [];
-      const radiusX = 380, radiusY = 250, depthStart = -300, depthStep = 60;
+      const radius = 320;
       for (let i = 0; i < count; i++) {
         const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
-        const x = Math.cos(angle) * radiusX;
-        const y = Math.sin(angle) * radiusY;
-        const z = depthStart + i * depthStep;
-        positions.push({ x, y, z });
+        positions.push({
+          x: Math.cos(angle) * radius,
+          y: Math.sin(angle) * radius * 0.7,
+          z: -100 + Math.sin(angle * 2) * 80
+        });
       }
       internetNodesPositions = positions;
 
-      // Генерация соединений
+      // Соединения
       const connections = [];
       for (let i = 0; i < count; i++) {
-        const next1 = (i + 1) % count;
-        const next2 = (i + 2) % count;
-        const prev = (i - 1 + count) % count;
-        connections.push({ from: i, to: next1, layer: 'front' });
-        connections.push({ from: i, to: next2, layer: 'back' });
-        if (i % 2 === 0) connections.push({ from: i, to: prev, layer: 'back' });
+        connections.push({ from: i, to: (i+1) % count, layer: 'front' });
+        connections.push({ from: i, to: (i+2) % count, layer: 'back' });
+        if (i % 3 === 0) connections.push({ from: i, to: (i+count-1) % count, layer: 'back' });
       }
       internetConnections = connections;
 
       const currentPos = positions[learningStep];
-      const cameraX = -currentPos.x;
-      const cameraY = -currentPos.y;
-      const cameraZ = -currentPos.z + 600;
+      const cameraTransform = `translate3d(${-currentPos.x}px, ${-currentPos.y}px, ${-currentPos.z + 500}px)`;
+
+      // Содержимое карточки для текущего шага
+      const step = steps[learningStep];
 
       return `
-        <div class="internet-fullscreen w-full">
-          <div class="w-full px-6 py-3 flex-shrink-0 z-30">
+        <div class="internet-scene">
+          <!-- Верхняя панель -->
+          <div class="absolute top-2 left-0 right-0 px-6 z-40 pointer-events-none">
             <div class="flex justify-between items-center text-white/60 text-sm">
-              <button class="hover:text-[#00FF94] transition-colors flex items-center gap-1" onclick="goBack()">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i> Назад
-              </button>
+              <button class="hover:text-[#00FF94] transition-colors flex items-center gap-1 pointer-events-auto" onclick="goBack()"><i data-lucide="arrow-left" class="w-4 h-4"></i> Назад</button>
               <span>Узел ${learningStep+1} из ${steps.length}</span>
               <div class="w-20"></div>
             </div>
@@ -427,116 +489,90 @@
             </div>
           </div>
 
-          <div class="scene-container">
-            <div class="scene-camera" id="internetScene" style="transform: translate3d(${cameraX}px, ${cameraY}px, ${cameraZ}px);">
-              
-              <!-- Фоновые сетки для глубины -->
+          <!-- 3D сцена -->
+          <div class="internet-canvas-3d">
+            <div class="internet-camera" id="internetCamera" style="transform: ${cameraTransform};">
+              <!-- Фоновые сетки -->
               <div class="absolute inset-0" style="transform-style: preserve-3d;">
-                ${[-800,-600,-400,-200,0,200,400,600,800].map(z => `
-                  <div class="absolute" style="width:2000px; height:1px; left:-1000px; top:50%; background:linear-gradient(90deg, transparent, rgba(0,255,148,0.1), transparent); transform: translate3d(0,0,${z}px);"></div>
-                  <div class="absolute" style="width:1px; height:2000px; left:50%; top:-1000px; background:linear-gradient(180deg, transparent, rgba(45,126,231,0.1), transparent); transform: translate3d(0,0,${z}px);"></div>
+                ${[-600,-300,0,300,600].map(z => `
+                  <div class="absolute" style="width:2000px; height:1px; left:-1000px; top:50%; background:linear-gradient(90deg, transparent, rgba(0,255,148,0.08), transparent); transform: translate3d(0,0,${z}px);"></div>
+                  <div class="absolute" style="width:1px; height:2000px; left:50%; top:-1000px; background:linear-gradient(180deg, transparent, rgba(45,126,231,0.08), transparent); transform: translate3d(0,0,${z}px);"></div>
                 `).join('')}
               </div>
 
-              <!-- Линии соединений - задний слой -->
-              <svg class="absolute" style="width:2000px; height:2000px; left:-1000px; top:-1000px; transform: translateZ(-100px); pointer-events:none;" id="internetLinesBack">
+              <!-- Линии (SVG) -->
+              <svg class="internet-lines-svg" style="transform: translateZ(-50px);">
                 <defs>
-                  <linearGradient id="lineGradBack" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#00FF94" stop-opacity="0.2"/>
-                    <stop offset="100%" stop-color="#2D7EE7" stop-opacity="0.2"/>
-                  </linearGradient>
-                </defs>
-                ${internetConnections.filter(c => c.layer === 'back').map((c, idx) => {
-                  const from = positions[c.from], to = positions[c.to];
-                  return `<line x1="${1000+from.x}" y1="${1000+from.y}" x2="${1000+to.x}" y2="${1000+to.y}" stroke="url(#lineGradBack)" stroke-width="1.5" stroke-dasharray="4 6" class="connection-line" data-from="${c.from}" data-to="${c.to}" style="opacity:0.3;"/>`;
-                }).join('')}
-              </svg>
-
-              <!-- Линии соединений - передний слой -->
-              <svg class="absolute" style="width:2000px; height:2000px; left:-1000px; top:-1000px; transform: translateZ(50px); pointer-events:none;" id="internetLinesFront">
-                <defs>
-                  <linearGradient id="lineGradFront" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#00FF94" stop-opacity="0.7"/>
-                    <stop offset="100%" stop-color="#2D7EE7" stop-opacity="0.9"/>
+                  <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#00FF94" stop-opacity="0.6"/>
+                    <stop offset="100%" stop-color="#2D7EE7" stop-opacity="0.8"/>
                   </linearGradient>
                   <filter id="glow"><feGaussianBlur stdDeviation="2"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
                 </defs>
-                ${internetConnections.filter(c => c.layer === 'front').map((c, idx) => {
+                ${internetConnections.map(c => {
                   const from = positions[c.from], to = positions[c.to];
                   const isActive = (c.from === learningStep || c.to === learningStep);
-                  return `<line x1="${1000+from.x}" y1="${1000+from.y}" x2="${1000+to.x}" y2="${1000+to.y}" stroke="url(#lineGradFront)" stroke-width="${isActive ? 3 : 2}" filter="url(#glow)" class="connection-line" data-from="${c.from}" data-to="${c.to}" style="opacity:${isActive ? 0.9 : 0.5}; transition: all 0.5s;"/>`;
+                  return `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="url(#lineGrad)" stroke-width="${isActive ? 3 : 1.5}" stroke-dasharray="${c.layer === 'back' ? '5,8' : 'none'}" opacity="${isActive ? 0.9 : 0.4}" filter="url(#glow)" class="connection-line" data-from="${c.from}" data-to="${c.to}" style="transition: all 0.5s;"/>`;
                 }).join('')}
               </svg>
 
-              <!-- Узлы и карточки -->
-              ${steps.map((step, idx) => {
-                const pos = positions[idx];
-                const isActive = idx === learningStep;
-                return `
-                  <div class="absolute" style="transform: translate3d(${pos.x}px, ${pos.y}px, ${pos.z}px); left:50%; top:50%; margin-left:-20px; margin-top:-20px; transform-style: preserve-3d;">
-                    <div class="absolute rounded-full blur-2xl transition-all duration-500" style="width:120px; height:120px; left:-40px; top:-40px; background: radial-gradient(circle, ${isActive ? '#00FF94' : '#2D7EE7'}80, transparent); opacity: ${isActive ? 0.6 : 0.2};"></div>
-                    <div class="absolute rounded-full transition-all duration-500" style="width:40px; height:40px; left:0; top:0; background: radial-gradient(circle at 30% 30%, #00FF94, #2D7EE7); box-shadow: 0 0 30px ${isActive ? '#00FF94' : '#2D7EE7'}; transform: scale(${isActive ? 1.2 : 0.9}); border: 2px solid ${isActive ? '#00FF94' : '#2D7EE7'};"></div>
-                    
-                    ${isActive ? `
-                      <div class="absolute" style="left:-250px; top:-220px; width:500px; transform: translateZ(50px); opacity:1; transition: opacity 0.4s;">
-                        <div class="bg-gradient-to-br from-[#1a3150] to-[#0B1E33] border-2 rounded-3xl p-6 shadow-2xl" style="border-color: #00FF94; box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 30px #00FF9440;">
-                          <div class="flex items-center gap-3 mb-4">
-                            <div class="p-3 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-2xl border border-[#00FF94]/30">
-                              <i data-lucide="${step.icon}" class="w-6 h-6 text-[#00FF94]"></i>
-                            </div>
-                            <div class="flex-1">
-                              <div class="text-2xl mb-1">🌐</div>
-                              <h3 class="text-white font-bold text-xl">${step.title}</h3>
-                            </div>
-                          </div>
-                          <div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 rounded-2xl p-3 mb-4 border border-[#00FF94]/30">
-                            <p class="text-white font-bold text-center">${step.content.split('•')[0].trim()}</p>
-                          </div>
-                          <div class="space-y-2 mb-4">
-                            ${step.content.split('<br>').filter(p => p.includes('•')).slice(0,4).map(p => `
-                              <div class="flex items-start gap-2 bg-white/5 rounded-xl p-2 border border-white/10">
-                                <i data-lucide="shield" class="w-4 h-4 text-[#00FF94] mt-0.5"></i>
-                                <span class="text-white/90 text-sm">${p.replace('•','').trim()}</span>
-                              </div>
-                            `).join('')}
-                          </div>
-                          <div class="bg-[#0B1E33] rounded-2xl p-3 flex items-center gap-2 border border-[#00FF94]/30">
-                            ${getMascotSVG('winking', 'w-8 h-8 flex-shrink-0')}
-                            <p class="text-sm text-[#00FF94]">💡 ${step.title.includes('VPN')?'Бесплатные VPN продают данные':step.title.includes('Коды')?'Никому не сообщайте код':'Всегда проверяйте ссылки'}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ` : ''}
-                  </div>
-                `;
-              }).join('')}
+              <!-- Узлы -->
+              ${positions.map((pos, idx) => `
+                <div class="internet-node ${idx === learningStep ? 'active' : ''}" style="transform: translate3d(${pos.x}px, ${pos.y}px, ${pos.z}px);">
+                  <div class="node-sphere" style="color: ${idx === learningStep ? '#00FF94' : '#2D7EE7'};" onclick="setInternetStep(${idx})"></div>
+                </div>
+              `).join('')}
 
               <!-- Частицы -->
-              ${[...Array(20)].map((_, i) => {
-                const x = (Math.random() - 0.5) * 1600;
-                const y = (Math.random() - 0.5) * 1600;
-                const z = (Math.random() - 0.5) * 800;
-                return `<div class="absolute w-1 h-1 rounded-full bg-[#00FF94] animate-pulse" style="left:50%; top:50%; transform: translate3d(${x}px, ${y}px, ${z}px); opacity:0.6;"></div>`;
+              ${[...Array(15)].map(() => {
+                const x = (Math.random() - 0.5) * 800;
+                const y = (Math.random() - 0.5) * 600;
+                const z = (Math.random() - 0.5) * 400;
+                return `<div class="absolute w-1 h-1 rounded-full bg-[#00FF94] animate-pulse" style="left:50%; top:50%; transform: translate3d(${x}px, ${y}px, ${z}px); opacity:0.5;"></div>`;
               }).join('')}
-            </div>
-
-            <!-- Боковые кнопки навигации -->
-            <div class="absolute top-1/2 -translate-y-1/2 left-4 right-4 flex justify-between z-40 pointer-events-none">
-              <button class="w-12 h-12 rounded-full bg-gradient-to-br from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] flex items-center justify-center shadow-xl hover:scale-110 transition-transform pointer-events-auto ${learningStep === 0 ? 'opacity-50 pointer-events-none' : ''}" onclick="prevStep()" ${learningStep === 0 ? 'disabled' : ''}>
-                <i data-lucide="chevron-left" class="w-6 h-6"></i>
-              </button>
-              <button class="w-12 h-12 rounded-full bg-gradient-to-br from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] flex items-center justify-center shadow-xl hover:scale-110 transition-transform pointer-events-auto ${learningStep === steps.length-1 ? 'opacity-50 pointer-events-none' : ''}" onclick="nextStep()" ${learningStep === steps.length-1 ? 'disabled' : ''}>
-                <i data-lucide="chevron-right" class="w-6 h-6"></i>
-              </button>
             </div>
           </div>
 
-          <!-- Индикатор точек и нижний блок -->
-          <div class="flex-shrink-0 px-6 pb-4 z-30">
-            <div class="flex justify-center gap-2 mb-4">
-              ${steps.map((_, idx) => `
-                <button class="h-2 rounded-full transition-all ${idx === learningStep ? 'w-8 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7]' : 'w-2 bg-white/30 hover:bg-white/50'}" onclick="setInternetStep(${idx})"></button>
-              `).join('')}
+          <!-- Центральная карточка -->
+          <div class="internet-card-overlay">
+            <div class="internet-card">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-2xl border border-[#00FF94]/30">
+                  <i data-lucide="${step.icon}" class="w-6 h-6 text-[#00FF94]"></i>
+                </div>
+                <div class="flex-1">
+                  <div class="text-2xl mb-1">🌐</div>
+                  <h3 class="text-white font-bold text-xl">${step.title}</h3>
+                </div>
+              </div>
+              <div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 rounded-2xl p-3 mb-4 border border-[#00FF94]/30">
+                <p class="text-white font-bold text-center">${step.content.split('•')[0].trim()}</p>
+              </div>
+              <div class="space-y-2 mb-4">
+                ${step.content.split('<br>').filter(p => p.includes('•')).slice(0,4).map(p => `
+                  <div class="flex items-start gap-2 bg-white/5 rounded-xl p-2 border border-white/10">
+                    <i data-lucide="shield" class="w-4 h-4 text-[#00FF94] mt-0.5"></i>
+                    <span class="text-white/90 text-sm">${p.replace('•','').trim()}</span>
+                  </div>
+                `).join('')}
+              </div>
+              <div class="bg-[#0B1E33] rounded-2xl p-3 flex items-center gap-2 border border-[#00FF94]/30">
+                ${getMascotSVG('winking', 'w-8 h-8 flex-shrink-0')}
+                <p class="text-sm text-[#00FF94]">💡 ${step.title.includes('VPN')?'Бесплатные VPN продают данные':step.title.includes('Коды')?'Никому не сообщайте код':'Всегда проверяйте ссылки'}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Боковые стрелки -->
+          <div class="absolute top-1/2 -translate-y-1/2 left-4 right-4 flex justify-between z-40 pointer-events-none">
+            <div class="nav-arrow ${learningStep === 0 ? 'disabled' : ''}" onclick="prevStep()"><i data-lucide="chevron-left" class="w-6 h-6"></i></div>
+            <div class="nav-arrow ${learningStep === steps.length-1 ? 'disabled' : ''}" onclick="nextStep()"><i data-lucide="chevron-right" class="w-6 h-6"></i></div>
+          </div>
+
+          <!-- Индикатор точек и кнопки -->
+          <div class="absolute bottom-4 left-0 right-0 px-6 z-40">
+            <div class="flex justify-center gap-2 mb-3">
+              ${steps.map((_, idx) => `<button class="h-2 rounded-full transition-all ${idx === learningStep ? 'w-8 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7]' : 'w-2 bg-white/30 hover:bg-white/50'}" onclick="setInternetStep(${idx})"></button>`).join('')}
             </div>
             <div class="bg-gradient-to-br from-[#1a3150] to-[#0B1E33] border border-[#00FF94]/20 rounded-3xl p-4 max-w-2xl mx-auto">
               <h3 class="text-lg font-bold text-white text-center mb-3">Готов проверить свои знания?</h3>
@@ -550,32 +586,87 @@
       `;
     }
 
-    // Вспомогательная функция для установки шага по клику на точку
     window.setInternetStep = function(step) {
       if (step === learningStep) return;
       stopSpeech();
       learningStep = step;
-      renderScreen();
-      setTimeout(() => {
-        updateInternetCamera();
+      // Плавно обновляем сцену без полного перерендера
+      const camera = document.getElementById('internetCamera');
+      if (camera) {
+        const pos = internetNodesPositions[step];
+        camera.style.transform = `translate3d(${-pos.x}px, ${-pos.y}px, ${-pos.z + 500}px)`;
+        // Обновить класс active у узлов
+        document.querySelectorAll('.internet-node').forEach((node, idx) => {
+          node.classList.toggle('active', idx === step);
+        });
+        // Обновить яркость линий
+        document.querySelectorAll('.connection-line').forEach(line => {
+          const from = parseInt(line.dataset.from);
+          const to = parseInt(line.dataset.to);
+          const active = (from === step || to === step);
+          line.style.opacity = active ? '0.9' : '0.4';
+          line.setAttribute('stroke-width', active ? '3' : '1.5');
+        });
+        // Обновить контент карточки
+        updateInternetCardContent(step);
+        // Обновить прогресс и счётчик
+        document.querySelector('.internet-scene .text-white\\/60 span:last-child').textContent = `Узел ${step+1} из ${internetSteps.length}`;
+        const progressBar = document.querySelector('.internet-scene .bg-gradient-to-r');
+        if (progressBar) progressBar.style.width = `${((step+1)/internetSteps.length)*100}%`;
+        // Обновить индикаторы точек
+        document.querySelectorAll('.internet-scene .flex.justify-center.gap-2 button').forEach((btn, idx) => {
+          btn.className = `h-2 rounded-full transition-all ${idx === step ? 'w-8 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7]' : 'w-2 bg-white/30 hover:bg-white/50'}`;
+        });
+        // Обновить стрелки
+        const leftArrow = document.querySelector('.internet-scene .nav-arrow:first-child');
+        const rightArrow = document.querySelector('.internet-scene .nav-arrow:last-child');
+        if (leftArrow) leftArrow.classList.toggle('disabled', step === 0);
+        if (rightArrow) rightArrow.classList.toggle('disabled', step === internetSteps.length-1);
         triggerNetworkTransition();
-      }, 50);
+      } else {
+        renderScreen();
+      }
     };
+
+    function updateInternetCardContent(stepIdx) {
+      const step = internetSteps[stepIdx];
+      const card = document.querySelector('.internet-card');
+      if (!card) return;
+      card.innerHTML = `
+        <div class="flex items-center gap-3 mb-4">
+          <div class="p-3 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-2xl border border-[#00FF94]/30">
+            <i data-lucide="${step.icon}" class="w-6 h-6 text-[#00FF94]"></i>
+          </div>
+          <div class="flex-1">
+            <div class="text-2xl mb-1">🌐</div>
+            <h3 class="text-white font-bold text-xl">${step.title}</h3>
+          </div>
+        </div>
+        <div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 rounded-2xl p-3 mb-4 border border-[#00FF94]/30">
+          <p class="text-white font-bold text-center">${step.content.split('•')[0].trim()}</p>
+        </div>
+        <div class="space-y-2 mb-4">
+          ${step.content.split('<br>').filter(p => p.includes('•')).slice(0,4).map(p => `
+            <div class="flex items-start gap-2 bg-white/5 rounded-xl p-2 border border-white/10">
+              <i data-lucide="shield" class="w-4 h-4 text-[#00FF94] mt-0.5"></i>
+              <span class="text-white/90 text-sm">${p.replace('•','').trim()}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="bg-[#0B1E33] rounded-2xl p-3 flex items-center gap-2 border border-[#00FF94]/30">
+          ${getMascotSVG('winking', 'w-8 h-8 flex-shrink-0')}
+          <p class="text-sm text-[#00FF94]">💡 ${step.title.includes('VPN')?'Бесплатные VPN продают данные':step.title.includes('Коды')?'Никому не сообщайте код':'Всегда проверяйте ссылки'}</p>
+        </div>
+      `;
+      lucide.createIcons();
+    }
 
     function updateInternetCamera() {
       if (currentTopic !== 'internet') return;
-      const scene = document.getElementById('internetScene');
-      if (!scene || !internetNodesPositions.length) return;
+      const camera = document.getElementById('internetCamera');
+      if (!camera || !internetNodesPositions.length) return;
       const pos = internetNodesPositions[learningStep];
-      scene.style.transform = `translate3d(${-pos.x}px, ${-pos.y}px, ${-pos.z + 600}px)`;
-      
-      document.querySelectorAll('.connection-line').forEach(line => {
-        const from = parseInt(line.dataset.from);
-        const to = parseInt(line.dataset.to);
-        const isActive = (from === learningStep || to === learningStep);
-        line.style.opacity = isActive ? '0.9' : '0.3';
-        line.setAttribute('stroke-width', isActive ? '3' : '1.5');
-      });
+      camera.style.transform = `translate3d(${-pos.x}px, ${-pos.y}px, ${-pos.z + 500}px)`;
     }
 
     function renderLearning() {
@@ -644,7 +735,7 @@
       else if (currentScreen === 'game') html = renderGame();
       content.innerHTML = html; lucide.createIcons();
       updateActiveNav();
-      if (currentScreen === 'learning') { if (currentTopic === 'phone') setTimeout(() => initSwipe(), 100); else if (currentTopic === 'internet') setTimeout(() => updateInternetCamera(), 100); }
+      if (currentScreen === 'learning') { if (currentTopic === 'phone') setTimeout(() => initSwipe(), 100); }
     }
 
     // Навигация
@@ -658,18 +749,18 @@
     window.goBack = function() { stopSpeech(); if (currentScreen === 'learning') { currentScreen = 'topicSelect'; renderScreen(); } else goHome(); };
     window.startLearning = function(topic) { stopSpeech(); currentTopic = topic; learningStep = 0; currentScreen = 'learning'; renderScreen(); };
     window.nextStep = function() {
-      stopSpeech(); let steps; if (currentTopic === 'phone') steps = phoneSteps; else if (currentTopic === 'internet') steps = internetSteps; else steps = computerSteps;
-      if (learningStep < steps.length - 1) { learningStep++; if (currentTopic === 'internet') { renderScreen(); setTimeout(() => updateInternetCamera(), 50); triggerNetworkTransition(); } else renderScreen(); }
+      stopSpeech(); let steps = currentTopic === 'phone' ? phoneSteps : (currentTopic === 'internet' ? internetSteps : computerSteps);
+      if (learningStep < steps.length - 1) { learningStep++; if (currentTopic === 'internet') { setInternetStep(learningStep); } else renderScreen(); }
     };
     window.prevStep = function() {
-      stopSpeech(); if (learningStep > 0) { learningStep--; if (currentTopic === 'internet') { renderScreen(); setTimeout(() => updateInternetCamera(), 50); triggerNetworkTransition(); } else renderScreen(); }
+      stopSpeech(); if (learningStep > 0) { learningStep--; if (currentTopic === 'internet') { setInternetStep(learningStep); } else renderScreen(); }
     };
     window.finishLearning = function() { stopSpeech(); currentScreen = 'topicSelect'; renderScreen(); };
     window.selectQuizAnswer = function(idx) { if (quizState.selectedAnswer !== null) return; quizState.selectedAnswer = idx; quizState.showExplanation = true; if (idx === quizState.questions[quizState.currentQuestion].correct) quizState.score++; renderScreen(); };
-    window.nextQuizQuestion = function() { if (quizState.currentQuestion < quizState.questions.length - 1) { quizState.currentQuestion++; quizState.selectedAnswer = null; quizState.showExplanation = false; } else { quizState.currentQuestion = quizState.questions.length; } renderScreen(); };
+    window.nextQuizQuestion = function() { if (quizState.currentQuestion < quizState.questions.length - 1) { quizState.currentQuestion++; quizState.selectedAnswer = null; quizState.showExplanation = false; renderScreen(); } else { quizState.currentQuestion = quizState.questions.length; renderScreen(); } };
     window.restartQuiz = function() { stopSpeech(); quizState.currentQuestion = 0; quizState.selectedAnswer = null; quizState.showExplanation = false; quizState.score = 0; renderScreen(); };
     window.selectGameAnswer = function(isScam) { if (gameState.selectedAnswer !== null) return; gameState.selectedAnswer = isScam; gameState.showResult = true; if (isScam === gameState.messages[gameState.currentMessage].isScam) gameState.score++; renderScreen(); };
-    window.nextGameMessage = function() { if (gameState.currentMessage < gameState.messages.length - 1) { gameState.currentMessage++; gameState.selectedAnswer = null; gameState.showResult = false; } else { gameState.currentMessage = gameState.messages.length; } renderScreen(); };
+    window.nextGameMessage = function() { if (gameState.currentMessage < gameState.messages.length - 1) { gameState.currentMessage++; gameState.selectedAnswer = null; gameState.showResult = false; renderScreen(); } else { gameState.currentMessage = gameState.messages.length; renderScreen(); } };
     window.restartGame = function() { stopSpeech(); gameState.currentMessage = 0; gameState.selectedAnswer = null; gameState.showResult = false; gameState.score = 0; renderScreen(); };
 
     document.getElementById('mobileMenuBtn').addEventListener('click', () => { document.getElementById('mobileNav').classList.toggle('hidden'); });
