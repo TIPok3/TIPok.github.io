@@ -108,36 +108,21 @@
     }
     .card-enter { animation: cardFadeIn 0.4s ease-out; }
     @keyframes cardFadeIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
-    /* Таблица в телефоне – горизонтальная прокрутка */
-    .phone-content .table-wrapper {
-      overflow-x: auto;
-      margin: 0 -10px;
-      padding: 0 10px;
-    }
-    .phone-content table {
-      width: 100%;
-      font-size: 11px;
-      border-collapse: collapse;
-    }
-    .phone-content th, .phone-content td {
-      padding: 6px 4px;
-      white-space: nowrap;
-    }
 
-    /* ========== КОМПЬЮТЕР ========== */
+    /* ========== КОМПЬЮТЕР (расширенный) ========== */
     .computer-monitor {
       background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
       border-radius: 1.5rem 1.5rem 0.5rem 0.5rem;
       padding: 1rem;
       box-shadow: 0 0 0 4px #2D7EE7, 0 20px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
-      width: 700px;
+      width: 800px;
       margin: 0 auto;
     }
     .computer-screen {
       background: #0B1E33;
       border-radius: 1rem;
       overflow: hidden;
-      height: 450px;
+      height: 520px;
       box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
     }
     .computer-content {
@@ -148,7 +133,9 @@
     }
     .computer-window {
       background: linear-gradient(145deg, #1a3150, #0B1E33);
-      border: 1px solid #00FF94;
+      border: none;
+      outline: 2px solid #2D7EE7;
+      outline-offset: -2px;
       border-radius: 12px;
       overflow: hidden;
       height: 100%;
@@ -173,19 +160,22 @@
       padding: 20px;
       overflow-y: auto;
     }
-    /* Убираем лишнюю внутреннюю обводку */
-    .computer-window {
-      border: none;
-      outline: 2px solid #2D7EE7;
-      outline-offset: -2px;
+    .computer-stand {
+      width: 100px;
+      height: 20px;
+      background: #2D7EE7;
+      margin: 0 auto;
+      border-radius: 0 0 10px 10px;
     }
-    .computer-monitor {
-      border: none;
-      outline: 4px solid #2D7EE7;
-      outline-offset: -2px;
+    .computer-base {
+      width: 180px;
+      height: 8px;
+      background: #1a1a2e;
+      margin: 5px auto 0;
+      border-radius: 4px;
     }
 
-    /* ========== ИНТЕРНЕТ (3D) – компактная версия ========== */
+    /* ========== ИНТЕРНЕТ (компактная 3D сеть) ========== */
     .internet-3d-scene {
       perspective: 1000px;
       perspective-origin: 50% 50%;
@@ -338,16 +328,40 @@
       return `<div class="min-h-screen w-full flex items-start justify-center pt-16"><div class="w-full px-4 lg:px-8 max-w-6xl mx-auto"><h2 class="text-4xl lg:text-5xl font-bold text-white text-center mb-10">Что будем проверять?</h2><div class="flex flex-col md:flex-row items-center justify-center gap-8"><div class="topic-card"><div class="w-40 h-40 topic-figure relative"><svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl relative z-10"><defs><linearGradient id="gradBulb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs><ellipse cx="60" cy="55" rx="25" ry="32" fill="url(#gradBulb)" stroke="#0B1E33" stroke-width="3"/><rect x="52" y="82" width="16" height="15" rx="4" fill="#2D7EE7" stroke="#0B1E33" stroke-width="2"/><line x1="60" y1="82" x2="60" y2="72" stroke="#0B1E33" stroke-width="2"/><path class="bulb-filament" d="M50 45 Q60 35 70 45" stroke="#666" stroke-width="3" fill="none"/></svg><div class="bulb-glow absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-all duration-300" style="background: radial-gradient(circle at center, rgba(255,215,0,0.6) 0%, rgba(255,215,0,0) 70%); filter: blur(12px);"></div></div><button class="topic-button" onclick="navigateTo('quiz')">Квиз</button></div><div class="topic-card"><div class="w-40 h-40 topic-figure"><svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl"><defs><linearGradient id="gradMask" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs><path d="M30 30 Q60 15 90 30 L90 75 Q60 95 30 75 Z" fill="#1a2a3a" stroke="#0B1E33" stroke-width="3"/><ellipse cx="45" cy="55" rx="10" ry="7" fill="white" stroke="#0B1E33" stroke-width="2"/><ellipse cx="75" cy="55" rx="10" ry="7" fill="white" stroke="#0B1E33" stroke-width="2"/><circle cx="42" cy="53" r="4" fill="#0B1E33"/><circle cx="78" cy="53" r="4" fill="#0B1E33"/><circle cx="25" cy="90" r="18" fill="none" stroke="#0B1E33" stroke-width="4"/><line x1="15" y1="80" x2="35" y2="100" stroke="#0B1E33" stroke-width="2"/><line x1="35" y1="80" x2="15" y2="100" stroke="#0B1E33" stroke-width="2"/><path d="M38 102 Q45 110 55 108" stroke="#0B1E33" stroke-width="5" fill="none" stroke-linecap="round"/></svg></div><button class="topic-button" onclick="navigateTo('game')">Найди мошенника</button></div></div></div></div>`;
     }
 
-    // ---------- ТЕЛЕФОН (с поддержкой таблицы) ----------
+    // Утилита: преобразовать таблицу в список (для телефона)
+    function convertTableToList(html) {
+      if (!html.includes('<table')) return html;
+      const tableMatch = html.match(/<table[\s\S]*?<\/table>/i);
+      if (!tableMatch) return html;
+      const tableHtml = tableMatch[0];
+      const rows = [];
+      const rowMatches = tableHtml.match(/<tr[\s\S]*?<\/tr>/gi);
+      if (rowMatches) {
+        for (let i = 1; i < rowMatches.length; i++) { // пропускаем заголовок
+          const cells = rowMatches[i].match(/<td[\s\S]*?<\/td>/gi);
+          if (cells && cells.length >= 4) {
+            const method = cells[0].replace(/<\/?td>/gi, '').trim();
+            const pros = cells[1].replace(/<\/?td>/gi, '').trim();
+            const cons = cells[2].replace(/<\/?td>/gi, '').trim();
+            const rating = cells[3].replace(/<\/?td>/gi, '').trim();
+            rows.push(`<div class="flex flex-col gap-1 bg-white/5 rounded-lg p-2 border border-white/10 mb-2"><div class="flex justify-between items-center"><span class="font-bold text-white">${method}</span><span class="text-[#00FF94] text-xs">${rating}</span></div><div class="text-white/80 text-xs">✅ ${pros}</div><div class="text-white/80 text-xs">❌ ${cons}</div></div>`);
+          }
+        }
+      }
+      if (rows.length) {
+        return html.replace(tableHtml, `<div class="space-y-2">${rows.join('')}</div>`);
+      }
+      return html;
+    }
+
+    // ---------- ТЕЛЕФОН (с преобразованием таблицы) ----------
     function renderPhone() {
       const steps = phoneSteps;
       const step = steps[learningStep];
       const isLast = learningStep === steps.length - 1;
-      // Обернём содержимое в div с прокруткой, если есть таблица
       let contentHtml = step.content;
-      if (contentHtml.includes('<table')) {
-        contentHtml = `<div class="table-wrapper">${contentHtml}</div>`;
-      }
+      // Если есть таблица – преобразуем в блоки
+      contentHtml = convertTableToList(contentHtml);
       return `
         <div class="w-full px-4 lg:px-8 max-w-4xl mx-auto">
           <div class="text-center mb-2">
@@ -366,7 +380,9 @@
                         <div class="flex-1"><div class="text-xl mb-0">📱</div><h3 class="text-white font-bold text-md">${step.title}</h3></div>
                       </div>
                       <div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 border border-[#00FF94]/30 rounded-xl p-3 mb-3"><p class="text-white font-semibold text-sm text-center">${step.content.split('•')[0]}</p></div>
-                      <div class="space-y-1 mb-3 flex-1">${contentHtml.split('<br>').filter(p=>p.includes('•')).map(p=>`<div class="flex items-start gap-2 bg-white/5 rounded-lg p-2 border border-white/10"><i data-lucide="shield" class="w-3 h-3 text-[#00FF94] mt-0.5"></i><span class="text-white/90 text-xs">${p.replace('•','').trim()}</span></div>`).join('')}</div>
+                      <div class="space-y-1 mb-3 flex-1">
+                        ${contentHtml.split('<br>').filter(p=>p.includes('•')).map(p=>`<div class="flex items-start gap-2 bg-white/5 rounded-lg p-2 border border-white/10"><i data-lucide="shield" class="w-3 h-3 text-[#00FF94] mt-0.5"></i><span class="text-white/90 text-xs">${p.replace('•','').trim()}</span></div>`).join('')}
+                      </div>
                       <div class="bg-[#1a3150] border border-[#2D7EE7]/30 rounded-xl p-2 flex items-start gap-2"><div class="w-8 h-8">${getMascotSVG('happy', 'w-8 h-8')}</div><p class="text-[#00FF94] text-xs">💡 Совет: ${step.title.includes('PIN')?'Всегда меняйте PIN по умолчанию':step.title.includes('Блокировка')?'Используйте биометрию + пароль':step.title.includes('Разрешения')?'Проверяйте права приложений':step.title.includes('Вирусы')?'Регулярно обновляйте систему':'Будьте внимательны в сети'}</p></div>
                     </div>
                   </div>
@@ -383,7 +399,7 @@
       `;
     }
 
-    // ---------- КОМПЬЮТЕР (исправлена обводка) ----------
+    // ---------- КОМПЬЮТЕР (расширенный) ----------
     function renderComputer() {
       const steps = computerSteps;
       const step = steps[learningStep];
