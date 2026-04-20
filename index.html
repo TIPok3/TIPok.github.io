@@ -263,7 +263,6 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.4);
       transition: transform 0.2s, box-shadow 0.2s;
       cursor: pointer;
-      pointer-events: auto;
       z-index: 100;
     }
     .nav-arrow:hover { transform: scale(1.1); box-shadow: 0 0 20px #00FF94; }
@@ -465,7 +464,7 @@
       `;
     }
 
-    // ========== ИНТЕРНЕТ 3D (ИСПРАВЛЕНО) ==========
+    // ========== ИНТЕРНЕТ 3D (ФИНАЛЬНАЯ ВЕРСИЯ) ==========
     function renderInternet() {
       const steps = internetSteps;
       const positions = NODE_POSITIONS;
@@ -476,7 +475,6 @@
 
       const step = steps[learningStep];
 
-      // SVG линии с центрированием и смещением 1000px
       const linesSvg = `
         <svg class="internet-lines-svg" style="left:50%; top:50%; transform:translate(-50%,-50%); width:2000px; height:2000px;">
           <defs>
@@ -512,7 +510,6 @@
           <!-- 3D сцена -->
           <div class="internet-canvas-3d">
             <div class="internet-camera" id="internetCamera" style="transform: ${cameraTransform};">
-              <!-- Фоновые сетки -->
               <div class="absolute inset-0" style="transform-style: preserve-3d;">
                 ${[-600,-300,0,300,600].map(z => `
                   <div class="absolute" style="width:2000px; height:1px; left:-1000px; top:50%; background:linear-gradient(90deg, transparent, rgba(0,255,148,0.08), transparent); transform: translate3d(0,0,${z}px);"></div>
@@ -522,14 +519,12 @@
 
               ${linesSvg}
 
-              <!-- Узлы -->
               ${positions.map((pos, idx) => `
                 <div class="internet-node ${idx === learningStep ? 'active' : ''}" style="transform: translate3d(${pos.x}px, ${pos.y}px, ${pos.z}px);">
                   <div class="node-sphere" style="color: ${idx === learningStep ? '#00FF94' : '#2D7EE7'};" onclick="setInternetStep(${idx})"></div>
                 </div>
               `).join('')}
 
-              <!-- Частицы -->
               ${[...Array(15)].map(() => {
                 const x = (Math.random() - 0.5) * 800;
                 const y = (Math.random() - 0.5) * 600;
@@ -539,7 +534,7 @@
             </div>
           </div>
 
-          <!-- Карточка по центру -->
+          <!-- Карточка -->
           <div class="internet-card-overlay">
             <div class="internet-card">
               <div class="flex items-center gap-3 mb-3">
@@ -569,10 +564,10 @@
             </div>
           </div>
 
-          <!-- Стрелки (поверх всего) -->
-          <div class="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-4 z-50 pointer-events-none" style="max-width: 700px; margin: 0 auto;">
-            <div class="nav-arrow ${learningStep === 0 ? 'disabled' : ''}" onclick="prevStep()" style="pointer-events: auto;"><i data-lucide="chevron-left" class="w-6 h-6"></i></div>
-            <div class="nav-arrow ${learningStep === steps.length-1 ? 'disabled' : ''}" onclick="nextStep()" style="pointer-events: auto;"><i data-lucide="chevron-right" class="w-6 h-6"></i></div>
+          <!-- Стрелки (без pointer-events: none на контейнере) -->
+          <div class="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-4 z-50" style="max-width: 700px; margin: 0 auto;">
+            <div class="nav-arrow ${learningStep === 0 ? 'disabled' : ''}" onclick="prevStep()"><i data-lucide="chevron-left" class="w-6 h-6"></i></div>
+            <div class="nav-arrow ${learningStep === steps.length-1 ? 'disabled' : ''}" onclick="nextStep()"><i data-lucide="chevron-right" class="w-6 h-6"></i></div>
           </div>
 
           <!-- Индикатор точек -->
@@ -677,7 +672,7 @@
       window.addEventListener('mouseup', (e) => { if (!mouseDown) return; const diff = e.clientX - mouseStartX; if (Math.abs(diff) > 50) diff > 0 ? prevStep() : nextStep(); mouseDown = false; card.style.cursor = 'grab'; });
     }
 
-    // Квиз и игра (без изменений)
+    // Квиз и игра
     function renderQuiz() {
       const q = quizState.questions[quizState.currentQuestion];
       const progress = ((quizState.currentQuestion + 1) / quizState.questions.length) * 100;
