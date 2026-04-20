@@ -464,7 +464,7 @@
       `;
     }
 
-    // ========== ИНТЕРНЕТ 3D (ФИНАЛЬНАЯ ВЕРСИЯ С КНОПКАМИ ВНИЗУ) ==========
+    // ========== ИНТЕРНЕТ 3D (ФИНАЛЬНАЯ ВЕРСИЯ) ==========
     function renderInternet() {
       const steps = internetSteps;
       const positions = NODE_POSITIONS;
@@ -474,7 +474,6 @@
       const cameraTransform = `translate3d(${-currentPos.x}px, ${-currentPos.y}px, ${-currentPos.z + 500}px)`;
 
       const step = steps[learningStep];
-      const isLast = learningStep === steps.length - 1;
 
       const linesSvg = `
         <svg class="internet-lines-svg" style="left:50%; top:50%; transform:translate(-50%,-50%); width:2000px; height:2000px;">
@@ -565,14 +564,14 @@
             </div>
           </div>
 
-          <!-- Кнопки навигации (как на других страницах) -->
-          <div class="absolute bottom-6 left-0 right-0 flex justify-center gap-4 z-50 px-4">
-            ${learningStep > 0 ? '<button class="px-6 py-3 bg-white/10 border border-white/20 rounded-xl text-base font-semibold text-white hover:bg-[#2D7EE7] transition-all" onclick="prevStep()"><i data-lucide="arrow-left" class="inline mr-2"></i>Назад</button>' : ''}
-            ${!isLast ? '<button class="px-6 py-3 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-base font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="nextStep()">Далее <i data-lucide="arrow-right" class="inline ml-2"></i></button>' : '<button class="px-6 py-3 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl text-base font-semibold hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all" onclick="finishLearning()">Завершить</button>'}
+          <!-- Стрелки (без pointer-events: none на контейнере) -->
+          <div class="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-4 z-50" style="max-width: 700px; margin: 0 auto;">
+            <div class="nav-arrow ${learningStep === 0 ? 'disabled' : ''}" onclick="prevStep()"><i data-lucide="chevron-left" class="w-6 h-6"></i></div>
+            <div class="nav-arrow ${learningStep === steps.length-1 ? 'disabled' : ''}" onclick="nextStep()"><i data-lucide="chevron-right" class="w-6 h-6"></i></div>
           </div>
 
-          <!-- Индикатор точек (поднимаем выше, чтобы не перекрывать кнопки) -->
-          <div class="absolute bottom-20 left-0 right-0 flex justify-center gap-2 z-40">
+          <!-- Индикатор точек -->
+          <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-40">
             ${steps.map((_, idx) => `<button class="h-2 rounded-full transition-all ${idx === learningStep ? 'w-8 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7]' : 'w-2 bg-white/30 hover:bg-white/50'}" onclick="setInternetStep(${idx})"></button>`).join('')}
           </div>
         </div>
