@@ -174,56 +174,14 @@
       border-radius: 4px;
     }
 
-    /* Интернет 3D */
+    /* Интернет (2D статичный) */
     .internet-scene {
       position: relative;
       width: 100%;
       height: calc(100vh - 5rem);
       overflow: hidden;
     }
-    .internet-canvas-3d {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      perspective: 1000px;
-      perspective-origin: 50% 50%;
-    }
-    .internet-camera {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      transform-style: preserve-3d;
-      transition: transform 1s cubic-bezier(0.23, 1, 0.32, 1);
-      will-change: transform;
-    }
-    .internet-node {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform-style: preserve-3d;
-      pointer-events: none;
-    }
-    .node-sphere {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #00FF94, #2D7EE7);
-      box-shadow: 0 0 20px currentColor;
-      position: absolute;
-      left: -12px;
-      top: -12px;
-      transition: transform 0.3s, box-shadow 0.3s;
-      pointer-events: auto;
-      cursor: pointer;
-      z-index: 60;
-    }
-    .internet-node.active .node-sphere {
-      transform: scale(1.3);
-      box-shadow: 0 0 30px #00FF94;
-    }
-    .internet-lines-svg {
+    .network-svg {
       position: absolute;
       top: 0;
       left: 0;
@@ -231,6 +189,30 @@
       height: 100%;
       pointer-events: none;
       z-index: 5;
+    }
+    .internet-nodes-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+    }
+    .node-2d {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #00FF94, #2D7EE7);
+      box-shadow: 0 0 20px currentColor;
+      transform: translate(-50%, -50%);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    .node-2d.active {
+      transform: translate(-50%, -50%) scale(1.3);
+      box-shadow: 0 0 30px #00FF94;
     }
     .internet-card-overlay {
       position: absolute;
@@ -313,28 +295,28 @@
     let quizState = { currentQuestion: 0, selectedAnswer: null, showExplanation: false, score: 0, questions: [] };
     let gameState = { currentMessage: 0, selectedAnswer: null, showResult: false, score: 0, messages: [] };
 
-    // Фиксированные 3D-координаты узлов
-    const NODE_POSITIONS = [
-      { x: 0, y: -280, z: -20 },    // 0
-      { x: 220, y: -200, z: -80 },  // 1
-      { x: 320, y: -60, z: -40 },   // 2
-      { x: 300, y: 120, z: -110 },  // 3
-      { x: 180, y: 260, z: -30 },   // 4
-      { x: -40, y: 300, z: -90 },   // 5
-      { x: -240, y: 220, z: -50 },  // 6
-      { x: -340, y: 60, z: -100 },  // 7
-      { x: -280, y: -120, z: -20 }, // 8
-      { x: -150, y: -260, z: -70 }, // 9
-      { x: 80, y: -320, z: -60 }    // 10
+    // Фиксированные позиции узлов (в % от контейнера)
+    const NODE_POSITIONS_2D = [
+      { left: 50, top: 25 },   // 0
+      { left: 68, top: 32 },   // 1
+      { left: 80, top: 45 },   // 2
+      { left: 78, top: 60 },   // 3
+      { left: 65, top: 73 },   // 4
+      { left: 48, top: 78 },   // 5
+      { left: 30, top: 70 },   // 6
+      { left: 18, top: 55 },   // 7
+      { left: 22, top: 38 },   // 8
+      { left: 35, top: 28 },   // 9
+      { left: 58, top: 20 }    // 10
     ];
 
     // Соединения
-    const NODE_CONNECTIONS = [];
-    const nodeCount = NODE_POSITIONS.length;
+    const NODE_CONNECTIONS_2D = [];
+    const nodeCount = NODE_POSITIONS_2D.length;
     for (let i = 0; i < nodeCount; i++) {
-      NODE_CONNECTIONS.push({ from: i, to: (i+1) % nodeCount });
-      NODE_CONNECTIONS.push({ from: i, to: (i+2) % nodeCount });
-      if (i % 3 === 0) NODE_CONNECTIONS.push({ from: i, to: (i+4) % nodeCount });
+      NODE_CONNECTIONS_2D.push({ from: i, to: (i+1) % nodeCount });
+      NODE_CONNECTIONS_2D.push({ from: i, to: (i+2) % nodeCount });
+      if (i % 3 === 0) NODE_CONNECTIONS_2D.push({ from: i, to: (i+4) % nodeCount });
     }
 
     async function loadData() {
@@ -464,31 +446,26 @@
       `;
     }
 
-    // ========== ИНТЕРНЕТ 3D (ФИНАЛЬНАЯ ВЕРСИЯ) ==========
+    // ========== ИНТЕРНЕТ (2D статичный, без скролла) ==========
     function renderInternet() {
       const steps = internetSteps;
-      const positions = NODE_POSITIONS;
-      const connections = NODE_CONNECTIONS;
-      
-      const currentPos = positions[learningStep];
-      const cameraTransform = `translate3d(${-currentPos.x}px, ${-currentPos.y}px, ${-currentPos.z + 500}px)`;
-
       const step = steps[learningStep];
 
+      // Статичные линии SVG
       const linesSvg = `
-        <svg class="internet-lines-svg" style="left:50%; top:50%; transform:translate(-50%,-50%); width:2000px; height:2000px;">
+        <svg class="network-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
           <defs>
-            <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient id="lineGrad2D" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stop-color="#00FF94" stop-opacity="0.7"/>
               <stop offset="100%" stop-color="#2D7EE7" stop-opacity="0.9"/>
             </linearGradient>
-            <filter id="glow"><feGaussianBlur stdDeviation="2"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="glow2D"><feGaussianBlur stdDeviation="1"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
           </defs>
-          ${connections.map(c => {
-            const from = positions[c.from];
-            const to = positions[c.to];
+          ${NODE_CONNECTIONS_2D.map(c => {
+            const from = NODE_POSITIONS_2D[c.from];
+            const to = NODE_POSITIONS_2D[c.to];
             const isActive = (c.from === learningStep || c.to === learningStep);
-            return `<line x1="${1000 + from.x}" y1="${1000 + from.y}" x2="${1000 + to.x}" y2="${1000 + to.y}" stroke="url(#lineGrad)" stroke-width="${isActive ? 3 : 1.5}" opacity="${isActive ? 0.9 : 0.4}" filter="url(#glow)" class="connection-line" data-from="${c.from}" data-to="${c.to}" style="transition: all 0.5s;"/>`;
+            return `<line x1="${from.left}%" y1="${from.top}%" x2="${to.left}%" y2="${to.top}%" stroke="url(#lineGrad2D)" stroke-width="${isActive ? 3 : 1.5}" opacity="${isActive ? 0.9 : 0.4}" filter="url(#glow2D)" />`;
           }).join('')}
         </svg>
       `;
@@ -507,31 +484,13 @@
             </div>
           </div>
 
-          <!-- 3D сцена -->
-          <div class="internet-canvas-3d">
-            <div class="internet-camera" id="internetCamera" style="transform: ${cameraTransform};">
-              <div class="absolute inset-0" style="transform-style: preserve-3d;">
-                ${[-600,-300,0,300,600].map(z => `
-                  <div class="absolute" style="width:2000px; height:1px; left:-1000px; top:50%; background:linear-gradient(90deg, transparent, rgba(0,255,148,0.08), transparent); transform: translate3d(0,0,${z}px);"></div>
-                  <div class="absolute" style="width:1px; height:2000px; left:50%; top:-1000px; background:linear-gradient(180deg, transparent, rgba(45,126,231,0.08), transparent); transform: translate3d(0,0,${z}px);"></div>
-                `).join('')}
-              </div>
+          ${linesSvg}
 
-              ${linesSvg}
-
-              ${positions.map((pos, idx) => `
-                <div class="internet-node ${idx === learningStep ? 'active' : ''}" style="transform: translate3d(${pos.x}px, ${pos.y}px, ${pos.z}px);">
-                  <div class="node-sphere" style="color: ${idx === learningStep ? '#00FF94' : '#2D7EE7'};" onclick="setInternetStep(${idx})"></div>
-                </div>
-              `).join('')}
-
-              ${[...Array(15)].map(() => {
-                const x = (Math.random() - 0.5) * 800;
-                const y = (Math.random() - 0.5) * 600;
-                const z = (Math.random() - 0.5) * 400;
-                return `<div class="absolute w-1 h-1 rounded-full bg-[#00FF94] animate-pulse" style="left:50%; top:50%; transform: translate3d(${x}px, ${y}px, ${z}px); opacity:0.5;"></div>`;
-              }).join('')}
-            </div>
+          <!-- Узлы -->
+          <div class="internet-nodes-container">
+            ${NODE_POSITIONS_2D.map((pos, idx) => `
+              <div class="node-2d ${idx === learningStep ? 'active' : ''}" style="left: ${pos.left}%; top: ${pos.top}%; color: ${idx === learningStep ? '#00FF94' : '#2D7EE7'};" onclick="setInternetStep(${idx})"></div>
+            `).join('')}
           </div>
 
           <!-- Карточка -->
@@ -564,7 +523,7 @@
             </div>
           </div>
 
-          <!-- Стрелки (без pointer-events: none на контейнере) -->
+          <!-- Стрелки -->
           <div class="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-4 z-50" style="max-width: 700px; margin: 0 auto;">
             <div class="nav-arrow ${learningStep === 0 ? 'disabled' : ''}" onclick="prevStep()"><i data-lucide="chevron-left" class="w-6 h-6"></i></div>
             <div class="nav-arrow ${learningStep === steps.length-1 ? 'disabled' : ''}" onclick="nextStep()"><i data-lucide="chevron-right" class="w-6 h-6"></i></div>
@@ -582,33 +541,42 @@
       if (step === learningStep) return;
       stopSpeech();
       learningStep = step;
-      const camera = document.getElementById('internetCamera');
-      if (camera) {
-        const pos = NODE_POSITIONS[step];
-        camera.style.transform = `translate3d(${-pos.x}px, ${-pos.y}px, ${-pos.z + 500}px)`;
-        document.querySelectorAll('.internet-node').forEach((node, idx) => node.classList.toggle('active', idx === step));
-        document.querySelectorAll('.connection-line').forEach(line => {
-          const from = parseInt(line.dataset.from);
-          const to = parseInt(line.dataset.to);
-          const active = (from === step || to === step);
-          line.style.opacity = active ? '0.9' : '0.4';
-          line.setAttribute('stroke-width', active ? '3' : '1.5');
-        });
-        updateInternetCardContent(step);
-        const stepSpan = document.querySelector('.internet-scene .text-white\\/60 span:last-child');
-        if (stepSpan) stepSpan.textContent = `Шаг ${step+1} из ${internetSteps.length}`;
-        const progressBar = document.querySelector('.internet-scene .bg-gradient-to-r');
-        if (progressBar) progressBar.style.width = `${((step+1)/internetSteps.length)*100}%`;
-        document.querySelectorAll('.internet-scene .flex.justify-center.gap-2 button').forEach((btn, idx) => {
-          btn.className = `h-2 rounded-full transition-all ${idx === step ? 'w-8 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7]' : 'w-2 bg-white/30 hover:bg-white/50'}`;
-        });
-        const leftArrow = document.querySelector('.internet-scene .nav-arrow:first-child');
-        const rightArrow = document.querySelector('.internet-scene .nav-arrow:last-child');
-        if (leftArrow) leftArrow.classList.toggle('disabled', step === 0);
-        if (rightArrow) rightArrow.classList.toggle('disabled', step === internetSteps.length-1);
-        triggerNetworkTransition();
-      } else {
-        renderScreen();
+      // Перерисовать только карточку и обновить активный узел
+      updateInternetCardContent(step);
+      document.querySelectorAll('.node-2d').forEach((node, idx) => {
+        node.classList.toggle('active', idx === step);
+        node.style.color = idx === step ? '#00FF94' : '#2D7EE7';
+      });
+      // Обновить прогресс и точки
+      const stepSpan = document.querySelector('.internet-scene .text-white\\/60 span:last-child');
+      if (stepSpan) stepSpan.textContent = `Шаг ${step+1} из ${internetSteps.length}`;
+      const progressBar = document.querySelector('.internet-scene .bg-gradient-to-r');
+      if (progressBar) progressBar.style.width = `${((step+1)/internetSteps.length)*100}%`;
+      document.querySelectorAll('.internet-scene .flex.justify-center.gap-2 button').forEach((btn, idx) => {
+        btn.className = `h-2 rounded-full transition-all ${idx === step ? 'w-8 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7]' : 'w-2 bg-white/30 hover:bg-white/50'}`;
+      });
+      const leftArrow = document.querySelector('.internet-scene .nav-arrow:first-child');
+      const rightArrow = document.querySelector('.internet-scene .nav-arrow:last-child');
+      if (leftArrow) leftArrow.classList.toggle('disabled', step === 0);
+      if (rightArrow) rightArrow.classList.toggle('disabled', step === internetSteps.length-1);
+      // Перерисовать линии (обновить active)
+      const linesSvg = document.querySelector('.network-svg');
+      if (linesSvg) {
+        linesSvg.innerHTML = `
+          <defs>
+            <linearGradient id="lineGrad2D" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00FF94" stop-opacity="0.7"/>
+              <stop offset="100%" stop-color="#2D7EE7" stop-opacity="0.9"/>
+            </linearGradient>
+            <filter id="glow2D"><feGaussianBlur stdDeviation="1"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          ${NODE_CONNECTIONS_2D.map(c => {
+            const from = NODE_POSITIONS_2D[c.from];
+            const to = NODE_POSITIONS_2D[c.to];
+            const isActive = (c.from === step || c.to === step);
+            return `<line x1="${from.left}%" y1="${from.top}%" x2="${to.left}%" y2="${to.top}%" stroke="url(#lineGrad2D)" stroke-width="${isActive ? 3 : 1.5}" opacity="${isActive ? 0.9 : 0.4}" filter="url(#glow2D)" />`;
+          }).join('')}
+        `;
       }
     };
 
@@ -645,14 +613,6 @@
       lucide.createIcons();
     }
 
-    function updateInternetCamera() {
-      if (currentTopic !== 'internet') return;
-      const camera = document.getElementById('internetCamera');
-      if (!camera) return;
-      const pos = NODE_POSITIONS[learningStep];
-      camera.style.transform = `translate3d(${-pos.x}px, ${-pos.y}px, ${-pos.z + 500}px)`;
-    }
-
     function renderLearning() {
       stopSpeech();
       if (currentTopic === 'phone') return renderPhone();
@@ -672,7 +632,7 @@
       window.addEventListener('mouseup', (e) => { if (!mouseDown) return; const diff = e.clientX - mouseStartX; if (Math.abs(diff) > 50) diff > 0 ? prevStep() : nextStep(); mouseDown = false; card.style.cursor = 'grab'; });
     }
 
-    // Квиз и игра
+    // Квиз и игра (без изменений)
     function renderQuiz() {
       const q = quizState.questions[quizState.currentQuestion];
       const progress = ((quizState.currentQuestion + 1) / quizState.questions.length) * 100;
