@@ -232,6 +232,7 @@
       pointer-events: none;
       transform-style: preserve-3d;
       z-index: 5;
+      /* Убираем смещение по Z, чтобы линии совпадали с узлами */
     }
     .internet-card-overlay {
       position: absolute;
@@ -315,7 +316,7 @@
     let quizState = { currentQuestion: 0, selectedAnswer: null, showExplanation: false, score: 0, questions: [] };
     let gameState = { currentMessage: 0, selectedAnswer: null, showResult: false, score: 0, messages: [] };
     
-    // Фиксированные позиции для 11 узлов (эллипс с хаотичной глубиной)
+    // Фиксированные позиции для 11 узлов
     const FIXED_POSITIONS = [
       { x: 0, y: -280, z: -20 },    // 0
       { x: 220, y: -200, z: -80 },  // 1
@@ -332,7 +333,7 @@
 
     let internetNodesPositions = FIXED_POSITIONS;
     
-    // Соединения: каждый узел соединён с двумя следующими и одним через два
+    // Соединения
     const FIXED_CONNECTIONS = [];
     const count = 11;
     for (let i = 0; i < count; i++) {
@@ -372,7 +373,6 @@
     function speakText(text) { if (!window.speechSynthesis) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang='ru-RU'; u.rate=0.9; u.onend=()=>currentSpeakingStepId=null; window.speechSynthesis.speak(u); }
     function stopSpeech() { if(window.speechSynthesis) window.speechSynthesis.cancel(); }
 
-    // Рендеры (без изменений, кроме Интернета)
     function renderHome() {
       return `<div class="min-h-screen w-full flex items-center justify-center"><div class="w-full px-4 lg:px-8 max-w-6xl mx-auto"><div class="grid lg:grid-cols-2 gap-12 items-center"><div class="text-center lg:text-left"><h1 class="text-5xl lg:text-7xl font-bold mb-6 py-2"><span class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] bg-clip-text text-transparent">Проверь свою киберсилу! </span><span>🔥</span></h1><p class="text-xl lg:text-2xl text-white/80 mb-8 leading-relaxed">Всего 30 минут — и ты научишься защищать телефон, компьютер и личные данные от мошенников. Играй и узнавай!</p><div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"><button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105" onclick="navigateTo('topicSelect')">Пройти обучение</button><button class="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold text-lg border border-white/20 hover:bg-white/20 hover:border-[#00FF94]/50 transition-all hover:scale-105" onclick="navigateTo('checkSelect')">Проверить знания</button></div></div><div class="flex justify-center"><div class="relative">${getMascotSVG('pointing', 'w-64 h-64 lg:w-96 lg:h-96')}<div class="absolute -z-10 inset-0 bg-gradient-to-br from-[#00FF94]/30 to-[#2D7EE7]/30 blur-3xl animate-pulse"></div></div></div></div></div></div>`;
     }
@@ -469,7 +469,7 @@
       `;
     }
 
-    // ========== ИНТЕРНЕТ (исправленная версия с фиксированными координатами) ==========
+    // ========== ИНТЕРНЕТ (исправлены линии и стрелки) ==========
     function renderInternet() {
       const steps = internetSteps;
       const positions = FIXED_POSITIONS;
@@ -480,9 +480,9 @@
 
       const step = steps[learningStep];
 
-      // Генерация SVG-линий
+      // SVG с линиями (без смещения по Z)
       const linesSvg = `
-        <svg class="internet-lines-svg" style="transform: translateZ(-50px);">
+        <svg class="internet-lines-svg">
           <defs>
             <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stop-color="#00FF94" stop-opacity="0.7"/>
