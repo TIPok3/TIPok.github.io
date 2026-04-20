@@ -237,7 +237,7 @@
       left: 50%;
       transform: translate(-50%, -50%);
       width: 90%;
-      max-width: 460px;
+      max-width: 540px;
       z-index: 50;
       pointer-events: none;
     }
@@ -245,7 +245,7 @@
       background: linear-gradient(145deg, #1a3150, #0B1E33);
       border: 2px solid #00FF94;
       border-radius: 2rem;
-      padding: 1.25rem;
+      padding: 1.5rem;
       box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 30px #00FF9440;
       pointer-events: auto;
       backdrop-filter: blur(4px);
@@ -263,6 +263,7 @@
       transition: transform 0.2s, box-shadow 0.2s;
       cursor: pointer;
       pointer-events: auto;
+      z-index: 100;
     }
     .nav-arrow:hover { transform: scale(1.1); box-shadow: 0 0 20px #00FF94; }
     .nav-arrow.disabled { opacity: 0.3; pointer-events: none; }
@@ -441,25 +442,25 @@
       `;
     }
 
-    // ========== ИНТЕРНЕТ (исправленная версия) ==========
+    // ========== ИНТЕРНЕТ (ПОЛНОСТЬЮ ПЕРЕСОБРАН) ==========
     function renderInternet() {
       const steps = internetSteps;
       const count = steps.length;
       
-      // Хаотичные позиции с сохранением эллиптической формы
+      // Хаотичные позиции в кольце
       const positions = [];
-      const baseRadius = 320;
+      const baseRadius = 300;
       for (let i = 0; i < count; i++) {
         const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
-        const randomOffset = 0.8 + Math.random() * 0.6; // вариация радиуса
+        const randomOffset = 0.8 + Math.random() * 0.5;
         const x = Math.cos(angle) * baseRadius * randomOffset;
         const y = Math.sin(angle) * baseRadius * 0.7 * randomOffset;
-        const z = -50 + Math.sin(angle * 2.5) * 120 + (Math.random() - 0.5) * 60;
+        const z = -40 + Math.sin(angle * 2.5) * 100 + (Math.random() - 0.5) * 50;
         positions.push({ x, y, z });
       }
       internetNodesPositions = positions;
 
-      // Соединения: каждый узел соединён с 2-3 соседями
+      // Соединения (сеть)
       const connections = [];
       for (let i = 0; i < count; i++) {
         connections.push({ from: i, to: (i+1) % count });
@@ -473,29 +474,10 @@
 
       const step = steps[learningStep];
 
-      // Генерация SVG-линий с координатами относительно камеры
-      const linesSvg = `
-        <svg class="internet-lines-svg" style="transform: translateZ(-50px);">
-          <defs>
-            <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#00FF94" stop-opacity="0.6"/>
-              <stop offset="100%" stop-color="#2D7EE7" stop-opacity="0.8"/>
-            </linearGradient>
-            <filter id="glow"><feGaussianBlur stdDeviation="2"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-          </defs>
-          ${internetConnections.map(c => {
-            const from = positions[c.from];
-            const to = positions[c.to];
-            const isActive = (c.from === learningStep || c.to === learningStep);
-            return `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="url(#lineGrad)" stroke-width="${isActive ? 3 : 1.5}" stroke-dasharray="${c.layer === 'back' ? '5,8' : 'none'}" opacity="${isActive ? 0.9 : 0.4}" filter="url(#glow)" class="connection-line" data-from="${c.from}" data-to="${c.to}" style="transition: all 0.5s;"/>`;
-          }).join('')}
-        </svg>
-      `;
-
       return `
         <div class="internet-scene">
-          <!-- Верхний бар прогресса -->
-          <div class="absolute top-2 left-1/2 -translate-x-1/2 w-auto max-w-md px-6 z-40 pointer-events-none" style="width: 90%; max-width: 500px;">
+          <!-- Верхний бар -->
+          <div class="absolute top-2 left-1/2 -translate-x-1/2 w-auto px-4 z-40 pointer-events-none" style="width: 90%; max-width: 600px;">
             <div class="flex justify-between items-center text-white/60 text-sm mb-1">
               <button class="hover:text-[#00FF94] transition-colors flex items-center gap-1 pointer-events-auto" onclick="goBack()"><i data-lucide="arrow-left" class="w-4 h-4"></i> Назад</button>
               <span class="text-base">Шаг ${learningStep+1} из ${steps.length}</span>
@@ -517,7 +499,22 @@
                 `).join('')}
               </div>
 
-              ${linesSvg}
+              <!-- ЛИНИИ СЕТИ (созданы заново в том же 3D-пространстве) -->
+              <svg class="internet-lines-svg" style="transform: translateZ(-30px);">
+                <defs>
+                  <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#00FF94" stop-opacity="0.6"/>
+                    <stop offset="100%" stop-color="#2D7EE7" stop-opacity="0.8"/>
+                  </linearGradient>
+                  <filter id="glow"><feGaussianBlur stdDeviation="2"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                </defs>
+                ${internetConnections.map(c => {
+                  const from = positions[c.from];
+                  const to = positions[c.to];
+                  const isActive = (c.from === learningStep || c.to === learningStep);
+                  return `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="url(#lineGrad)" stroke-width="${isActive ? 3 : 1.5}" stroke-dasharray="${c.layer === 'back' ? '5,8' : 'none'}" opacity="${isActive ? 0.9 : 0.4}" filter="url(#glow)" class="connection-line" data-from="${c.from}" data-to="${c.to}" style="transition: all 0.5s;"/>`;
+                }).join('')}
+              </svg>
 
               <!-- Узлы -->
               ${positions.map((pos, idx) => `
@@ -536,12 +533,12 @@
             </div>
           </div>
 
-          <!-- Карточка по центру -->
-          <div class="internet-card-overlay">
+          <!-- Карточка (чуть шире) -->
+          <div class="internet-card-overlay" style="max-width: 580px;">
             <div class="internet-card">
               <div class="flex items-center gap-3 mb-3">
-                <div class="p-2 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-xl border border-[#00FF94]/30">
-                  <i data-lucide="${step.icon}" class="w-5 h-5 text-[#00FF94]"></i>
+                <div class="p-2.5 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-xl border border-[#00FF94]/30">
+                  <i data-lucide="${step.icon}" class="w-6 h-6 text-[#00FF94]"></i>
                 </div>
                 <div class="flex-1">
                   <div class="text-xl mb-0.5">🌐</div>
@@ -549,30 +546,30 @@
                 </div>
               </div>
               <div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 rounded-xl p-3 mb-3 border border-[#00FF94]/30">
-                <p class="text-white font-semibold text-center text-sm">${step.content.split('•')[0].trim()}</p>
+                <p class="text-white font-semibold text-center">${step.content.split('•')[0].trim()}</p>
               </div>
-              <div class="space-y-1.5 mb-3">
+              <div class="space-y-2 mb-3">
                 ${step.content.split('<br>').filter(p => p.includes('•')).slice(0,4).map(p => `
-                  <div class="flex items-start gap-2 bg-white/5 rounded-lg p-2 border border-white/10">
+                  <div class="flex items-start gap-2 bg-white/5 rounded-lg p-2.5 border border-white/10">
                     <i data-lucide="shield" class="w-4 h-4 text-[#00FF94] mt-0.5"></i>
                     <span class="text-white/90 text-sm">${p.replace('•','').trim()}</span>
                   </div>
                 `).join('')}
               </div>
-              <div class="bg-[#0B1E33] rounded-xl p-2 flex items-center gap-2 border border-[#00FF94]/30">
-                ${getMascotSVG('winking', 'w-7 h-7 flex-shrink-0')}
+              <div class="bg-[#0B1E33] rounded-xl p-2.5 flex items-center gap-2 border border-[#00FF94]/30">
+                ${getMascotSVG('winking', 'w-8 h-8 flex-shrink-0')}
                 <p class="text-sm text-[#00FF94]">💡 ${step.title.includes('VPN')?'Бесплатные VPN продают данные':step.title.includes('Коды')?'Никому не сообщайте код':'Всегда проверяйте ссылки'}</p>
               </div>
             </div>
           </div>
 
-          <!-- Стрелки рядом с карточкой -->
-          <div class="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-2 sm:px-4 z-40 pointer-events-none" style="max-width: 700px; margin: 0 auto;">
-            <div class="nav-arrow ${learningStep === 0 ? 'disabled' : ''}" onclick="prevStep()" style="pointer-events: auto;"><i data-lucide="chevron-left" class="w-5 h-5"></i></div>
-            <div class="nav-arrow ${learningStep === steps.length-1 ? 'disabled' : ''}" onclick="nextStep()" style="pointer-events: auto;"><i data-lucide="chevron-right" class="w-5 h-5"></i></div>
+          <!-- СТРЕЛКИ (новые, с высоким z-index) -->
+          <div class="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-2 sm:px-4 z-50 pointer-events-none" style="max-width: 700px; margin: 0 auto;">
+            <div class="nav-arrow ${learningStep === 0 ? 'disabled' : ''}" onclick="window.prevStep()" style="pointer-events: auto;"><i data-lucide="chevron-left" class="w-6 h-6"></i></div>
+            <div class="nav-arrow ${learningStep === steps.length-1 ? 'disabled' : ''}" onclick="window.nextStep()" style="pointer-events: auto;"><i data-lucide="chevron-right" class="w-6 h-6"></i></div>
           </div>
 
-          <!-- Индикатор точек (без нижнего блока) -->
+          <!-- Индикатор точек -->
           <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-40">
             ${steps.map((_, idx) => `<button class="h-2 rounded-full transition-all ${idx === learningStep ? 'w-8 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7]' : 'w-2 bg-white/30 hover:bg-white/50'}" onclick="setInternetStep(${idx})"></button>`).join('')}
           </div>
@@ -597,7 +594,6 @@
           line.setAttribute('stroke-width', active ? '3' : '1.5');
         });
         updateInternetCardContent(step);
-        // Обновить прогресс и текст
         const stepSpan = document.querySelector('.internet-scene .text-white\\/60 span:last-child');
         if (stepSpan) stepSpan.textContent = `Шаг ${step+1} из ${internetSteps.length}`;
         const progressBar = document.querySelector('.internet-scene .bg-gradient-to-r');
@@ -621,8 +617,8 @@
       if (!card) return;
       card.innerHTML = `
         <div class="flex items-center gap-3 mb-3">
-          <div class="p-2 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-xl border border-[#00FF94]/30">
-            <i data-lucide="${step.icon}" class="w-5 h-5 text-[#00FF94]"></i>
+          <div class="p-2.5 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-xl border border-[#00FF94]/30">
+            <i data-lucide="${step.icon}" class="w-6 h-6 text-[#00FF94]"></i>
           </div>
           <div class="flex-1">
             <div class="text-xl mb-0.5">🌐</div>
@@ -630,18 +626,18 @@
           </div>
         </div>
         <div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 rounded-xl p-3 mb-3 border border-[#00FF94]/30">
-          <p class="text-white font-semibold text-center text-sm">${step.content.split('•')[0].trim()}</p>
+          <p class="text-white font-semibold text-center">${step.content.split('•')[0].trim()}</p>
         </div>
-        <div class="space-y-1.5 mb-3">
+        <div class="space-y-2 mb-3">
           ${step.content.split('<br>').filter(p => p.includes('•')).slice(0,4).map(p => `
-            <div class="flex items-start gap-2 bg-white/5 rounded-lg p-2 border border-white/10">
+            <div class="flex items-start gap-2 bg-white/5 rounded-lg p-2.5 border border-white/10">
               <i data-lucide="shield" class="w-4 h-4 text-[#00FF94] mt-0.5"></i>
               <span class="text-white/90 text-sm">${p.replace('•','').trim()}</span>
             </div>
           `).join('')}
         </div>
-        <div class="bg-[#0B1E33] rounded-xl p-2 flex items-center gap-2 border border-[#00FF94]/30">
-          ${getMascotSVG('winking', 'w-7 h-7 flex-shrink-0')}
+        <div class="bg-[#0B1E33] rounded-xl p-2.5 flex items-center gap-2 border border-[#00FF94]/30">
+          ${getMascotSVG('winking', 'w-8 h-8 flex-shrink-0')}
           <p class="text-sm text-[#00FF94]">💡 ${step.title.includes('VPN')?'Бесплатные VPN продают данные':step.title.includes('Коды')?'Никому не сообщайте код':'Всегда проверяйте ссылки'}</p>
         </div>
       `;
