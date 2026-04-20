@@ -206,17 +206,18 @@
       pointer-events: none;
     }
     .node-sphere {
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       background: radial-gradient(circle at 30% 30%, #00FF94, #2D7EE7);
       box-shadow: 0 0 20px currentColor;
       position: absolute;
-      left: -10px;
-      top: -10px;
+      left: -12px;
+      top: -12px;
       transition: transform 0.3s, box-shadow 0.3s;
       pointer-events: auto;
       cursor: pointer;
+      z-index: 60;
     }
     .internet-node.active .node-sphere {
       transform: scale(1.3);
@@ -230,6 +231,7 @@
       height: 100%;
       pointer-events: none;
       transform-style: preserve-3d;
+      z-index: 5;
     }
     .internet-card-overlay {
       position: absolute;
@@ -237,7 +239,7 @@
       left: 50%;
       transform: translate(-50%, -50%);
       width: 90%;
-      max-width: 540px;
+      max-width: 520px;
       z-index: 50;
       pointer-events: none;
     }
@@ -251,8 +253,8 @@
       backdrop-filter: blur(4px);
     }
     .nav-arrow {
-      width: 44px;
-      height: 44px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       background: linear-gradient(135deg, #00FF94, #2D7EE7);
       color: #0B1E33;
@@ -312,8 +314,33 @@
     let phoneSteps = [], internetSteps = [], computerSteps = [];
     let quizState = { currentQuestion: 0, selectedAnswer: null, showExplanation: false, score: 0, questions: [] };
     let gameState = { currentMessage: 0, selectedAnswer: null, showResult: false, score: 0, messages: [] };
-    let internetNodesPositions = [];
-    let internetConnections = [];
+    
+    // Фиксированные позиции для 11 узлов (эллипс с хаотичной глубиной)
+    const FIXED_POSITIONS = [
+      { x: 0, y: -280, z: -20 },    // 0
+      { x: 220, y: -200, z: -80 },  // 1
+      { x: 320, y: -60, z: -40 },   // 2
+      { x: 300, y: 120, z: -110 },  // 3
+      { x: 180, y: 260, z: -30 },   // 4
+      { x: -40, y: 300, z: -90 },   // 5
+      { x: -240, y: 220, z: -50 },  // 6
+      { x: -340, y: 60, z: -100 },  // 7
+      { x: -280, y: -120, z: -20 }, // 8
+      { x: -150, y: -260, z: -70 }, // 9
+      { x: 80, y: -320, z: -60 }    // 10
+    ];
+
+    let internetNodesPositions = FIXED_POSITIONS;
+    
+    // Соединения: каждый узел соединён с двумя следующими и одним через два
+    const FIXED_CONNECTIONS = [];
+    const count = 11;
+    for (let i = 0; i < count; i++) {
+      FIXED_CONNECTIONS.push({ from: i, to: (i+1) % count });
+      FIXED_CONNECTIONS.push({ from: i, to: (i+2) % count });
+      if (i % 3 === 0) FIXED_CONNECTIONS.push({ from: i, to: (i+4) % count });
+    }
+    let internetConnections = FIXED_CONNECTIONS;
 
     async function loadData() {
       try {
@@ -442,42 +469,40 @@
       `;
     }
 
-    // ========== ИНТЕРНЕТ (ПОЛНОСТЬЮ ПЕРЕСОБРАН) ==========
+    // ========== ИНТЕРНЕТ (исправленная версия с фиксированными координатами) ==========
     function renderInternet() {
       const steps = internetSteps;
-      const count = steps.length;
+      const positions = FIXED_POSITIONS;
+      const connections = FIXED_CONNECTIONS;
       
-      // Хаотичные позиции в кольце
-      const positions = [];
-      const baseRadius = 300;
-      for (let i = 0; i < count; i++) {
-        const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
-        const randomOffset = 0.8 + Math.random() * 0.5;
-        const x = Math.cos(angle) * baseRadius * randomOffset;
-        const y = Math.sin(angle) * baseRadius * 0.7 * randomOffset;
-        const z = -40 + Math.sin(angle * 2.5) * 100 + (Math.random() - 0.5) * 50;
-        positions.push({ x, y, z });
-      }
-      internetNodesPositions = positions;
-
-      // Соединения (сеть)
-      const connections = [];
-      for (let i = 0; i < count; i++) {
-        connections.push({ from: i, to: (i+1) % count });
-        connections.push({ from: i, to: (i+2) % count });
-        if (i % 3 === 0) connections.push({ from: i, to: (i+count-1) % count });
-      }
-      internetConnections = connections;
-
       const currentPos = positions[learningStep];
       const cameraTransform = `translate3d(${-currentPos.x}px, ${-currentPos.y}px, ${-currentPos.z + 500}px)`;
 
       const step = steps[learningStep];
 
+      // Генерация SVG-линий
+      const linesSvg = `
+        <svg class="internet-lines-svg" style="transform: translateZ(-50px);">
+          <defs>
+            <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00FF94" stop-opacity="0.7"/>
+              <stop offset="100%" stop-color="#2D7EE7" stop-opacity="0.9"/>
+            </linearGradient>
+            <filter id="glow"><feGaussianBlur stdDeviation="2"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          ${connections.map(c => {
+            const from = positions[c.from];
+            const to = positions[c.to];
+            const isActive = (c.from === learningStep || c.to === learningStep);
+            return `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="url(#lineGrad)" stroke-width="${isActive ? 3 : 1.5}" opacity="${isActive ? 0.9 : 0.4}" filter="url(#glow)" class="connection-line" data-from="${c.from}" data-to="${c.to}" style="transition: all 0.5s;"/>`;
+          }).join('')}
+        </svg>
+      `;
+
       return `
         <div class="internet-scene">
-          <!-- Верхний бар -->
-          <div class="absolute top-2 left-1/2 -translate-x-1/2 w-auto px-4 z-40 pointer-events-none" style="width: 90%; max-width: 600px;">
+          <!-- Верхний бар прогресса -->
+          <div class="absolute top-2 left-1/2 -translate-x-1/2 w-auto max-w-md px-6 z-40 pointer-events-none" style="width: 90%; max-width: 500px;">
             <div class="flex justify-between items-center text-white/60 text-sm mb-1">
               <button class="hover:text-[#00FF94] transition-colors flex items-center gap-1 pointer-events-auto" onclick="goBack()"><i data-lucide="arrow-left" class="w-4 h-4"></i> Назад</button>
               <span class="text-base">Шаг ${learningStep+1} из ${steps.length}</span>
@@ -499,22 +524,7 @@
                 `).join('')}
               </div>
 
-              <!-- ЛИНИИ СЕТИ (созданы заново в том же 3D-пространстве) -->
-              <svg class="internet-lines-svg" style="transform: translateZ(-30px);">
-                <defs>
-                  <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#00FF94" stop-opacity="0.6"/>
-                    <stop offset="100%" stop-color="#2D7EE7" stop-opacity="0.8"/>
-                  </linearGradient>
-                  <filter id="glow"><feGaussianBlur stdDeviation="2"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-                </defs>
-                ${internetConnections.map(c => {
-                  const from = positions[c.from];
-                  const to = positions[c.to];
-                  const isActive = (c.from === learningStep || c.to === learningStep);
-                  return `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="url(#lineGrad)" stroke-width="${isActive ? 3 : 1.5}" stroke-dasharray="${c.layer === 'back' ? '5,8' : 'none'}" opacity="${isActive ? 0.9 : 0.4}" filter="url(#glow)" class="connection-line" data-from="${c.from}" data-to="${c.to}" style="transition: all 0.5s;"/>`;
-                }).join('')}
-              </svg>
+              ${linesSvg}
 
               <!-- Узлы -->
               ${positions.map((pos, idx) => `
@@ -533,40 +543,40 @@
             </div>
           </div>
 
-          <!-- Карточка (чуть шире) -->
-          <div class="internet-card-overlay" style="max-width: 580px;">
+          <!-- Карточка по центру -->
+          <div class="internet-card-overlay">
             <div class="internet-card">
               <div class="flex items-center gap-3 mb-3">
-                <div class="p-2.5 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-xl border border-[#00FF94]/30">
+                <div class="p-2 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-xl border border-[#00FF94]/30">
                   <i data-lucide="${step.icon}" class="w-6 h-6 text-[#00FF94]"></i>
                 </div>
                 <div class="flex-1">
-                  <div class="text-xl mb-0.5">🌐</div>
-                  <h3 class="text-white font-bold text-lg">${step.title}</h3>
+                  <div class="text-2xl mb-0.5">🌐</div>
+                  <h3 class="text-white font-bold text-xl">${step.title}</h3>
                 </div>
               </div>
               <div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 rounded-xl p-3 mb-3 border border-[#00FF94]/30">
-                <p class="text-white font-semibold text-center">${step.content.split('•')[0].trim()}</p>
+                <p class="text-white font-semibold text-center text-base">${step.content.split('•')[0].trim()}</p>
               </div>
               <div class="space-y-2 mb-3">
                 ${step.content.split('<br>').filter(p => p.includes('•')).slice(0,4).map(p => `
-                  <div class="flex items-start gap-2 bg-white/5 rounded-lg p-2.5 border border-white/10">
+                  <div class="flex items-start gap-2 bg-white/5 rounded-lg p-2 border border-white/10">
                     <i data-lucide="shield" class="w-4 h-4 text-[#00FF94] mt-0.5"></i>
-                    <span class="text-white/90 text-sm">${p.replace('•','').trim()}</span>
+                    <span class="text-white/90 text-base">${p.replace('•','').trim()}</span>
                   </div>
                 `).join('')}
               </div>
-              <div class="bg-[#0B1E33] rounded-xl p-2.5 flex items-center gap-2 border border-[#00FF94]/30">
+              <div class="bg-[#0B1E33] rounded-xl p-3 flex items-center gap-2 border border-[#00FF94]/30">
                 ${getMascotSVG('winking', 'w-8 h-8 flex-shrink-0')}
-                <p class="text-sm text-[#00FF94]">💡 ${step.title.includes('VPN')?'Бесплатные VPN продают данные':step.title.includes('Коды')?'Никому не сообщайте код':'Всегда проверяйте ссылки'}</p>
+                <p class="text-base text-[#00FF94]">💡 ${step.title.includes('VPN')?'Бесплатные VPN продают данные':step.title.includes('Коды')?'Никому не сообщайте код':'Всегда проверяйте ссылки'}</p>
               </div>
             </div>
           </div>
 
-          <!-- СТРЕЛКИ (новые, с высоким z-index) -->
-          <div class="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-2 sm:px-4 z-50 pointer-events-none" style="max-width: 700px; margin: 0 auto;">
-            <div class="nav-arrow ${learningStep === 0 ? 'disabled' : ''}" onclick="window.prevStep()" style="pointer-events: auto;"><i data-lucide="chevron-left" class="w-6 h-6"></i></div>
-            <div class="nav-arrow ${learningStep === steps.length-1 ? 'disabled' : ''}" onclick="window.nextStep()" style="pointer-events: auto;"><i data-lucide="chevron-right" class="w-6 h-6"></i></div>
+          <!-- Стрелки (поверх всего) -->
+          <div class="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-4 z-50 pointer-events-none" style="max-width: 700px; margin: 0 auto;">
+            <div class="nav-arrow ${learningStep === 0 ? 'disabled' : ''}" onclick="prevStep()" style="pointer-events: auto;"><i data-lucide="chevron-left" class="w-6 h-6"></i></div>
+            <div class="nav-arrow ${learningStep === steps.length-1 ? 'disabled' : ''}" onclick="nextStep()" style="pointer-events: auto;"><i data-lucide="chevron-right" class="w-6 h-6"></i></div>
           </div>
 
           <!-- Индикатор точек -->
@@ -583,7 +593,7 @@
       learningStep = step;
       const camera = document.getElementById('internetCamera');
       if (camera) {
-        const pos = internetNodesPositions[step];
+        const pos = FIXED_POSITIONS[step];
         camera.style.transform = `translate3d(${-pos.x}px, ${-pos.y}px, ${-pos.z + 500}px)`;
         document.querySelectorAll('.internet-node').forEach((node, idx) => node.classList.toggle('active', idx === step));
         document.querySelectorAll('.connection-line').forEach(line => {
@@ -617,28 +627,28 @@
       if (!card) return;
       card.innerHTML = `
         <div class="flex items-center gap-3 mb-3">
-          <div class="p-2.5 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-xl border border-[#00FF94]/30">
+          <div class="p-2 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-xl border border-[#00FF94]/30">
             <i data-lucide="${step.icon}" class="w-6 h-6 text-[#00FF94]"></i>
           </div>
           <div class="flex-1">
-            <div class="text-xl mb-0.5">🌐</div>
-            <h3 class="text-white font-bold text-lg">${step.title}</h3>
+            <div class="text-2xl mb-0.5">🌐</div>
+            <h3 class="text-white font-bold text-xl">${step.title}</h3>
           </div>
         </div>
         <div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 rounded-xl p-3 mb-3 border border-[#00FF94]/30">
-          <p class="text-white font-semibold text-center">${step.content.split('•')[0].trim()}</p>
+          <p class="text-white font-semibold text-center text-base">${step.content.split('•')[0].trim()}</p>
         </div>
         <div class="space-y-2 mb-3">
           ${step.content.split('<br>').filter(p => p.includes('•')).slice(0,4).map(p => `
-            <div class="flex items-start gap-2 bg-white/5 rounded-lg p-2.5 border border-white/10">
+            <div class="flex items-start gap-2 bg-white/5 rounded-lg p-2 border border-white/10">
               <i data-lucide="shield" class="w-4 h-4 text-[#00FF94] mt-0.5"></i>
-              <span class="text-white/90 text-sm">${p.replace('•','').trim()}</span>
+              <span class="text-white/90 text-base">${p.replace('•','').trim()}</span>
             </div>
           `).join('')}
         </div>
-        <div class="bg-[#0B1E33] rounded-xl p-2.5 flex items-center gap-2 border border-[#00FF94]/30">
+        <div class="bg-[#0B1E33] rounded-xl p-3 flex items-center gap-2 border border-[#00FF94]/30">
           ${getMascotSVG('winking', 'w-8 h-8 flex-shrink-0')}
-          <p class="text-sm text-[#00FF94]">💡 ${step.title.includes('VPN')?'Бесплатные VPN продают данные':step.title.includes('Коды')?'Никому не сообщайте код':'Всегда проверяйте ссылки'}</p>
+          <p class="text-base text-[#00FF94]">💡 ${step.title.includes('VPN')?'Бесплатные VPN продают данные':step.title.includes('Коды')?'Никому не сообщайте код':'Всегда проверяйте ссылки'}</p>
         </div>
       `;
       lucide.createIcons();
@@ -647,8 +657,8 @@
     function updateInternetCamera() {
       if (currentTopic !== 'internet') return;
       const camera = document.getElementById('internetCamera');
-      if (!camera || !internetNodesPositions.length) return;
-      const pos = internetNodesPositions[learningStep];
+      if (!camera) return;
+      const pos = FIXED_POSITIONS[learningStep];
       camera.style.transform = `translate3d(${-pos.x}px, ${-pos.y}px, ${-pos.z + 500}px)`;
     }
 
