@@ -230,7 +230,6 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
-      transform-style: preserve-3d;
       z-index: 5;
     }
     .internet-card-overlay {
@@ -332,11 +331,11 @@
 
     // Соединения
     const NODE_CONNECTIONS = [];
-    const count = 11;
-    for (let i = 0; i < count; i++) {
-      NODE_CONNECTIONS.push({ from: i, to: (i+1) % count });
-      NODE_CONNECTIONS.push({ from: i, to: (i+2) % count });
-      if (i % 3 === 0) NODE_CONNECTIONS.push({ from: i, to: (i+4) % count });
+    const nodeCount = NODE_POSITIONS.length;
+    for (let i = 0; i < nodeCount; i++) {
+      NODE_CONNECTIONS.push({ from: i, to: (i+1) % nodeCount });
+      NODE_CONNECTIONS.push({ from: i, to: (i+2) % nodeCount });
+      if (i % 3 === 0) NODE_CONNECTIONS.push({ from: i, to: (i+4) % nodeCount });
     }
 
     async function loadData() {
@@ -369,7 +368,7 @@
     function speakText(text) { if (!window.speechSynthesis) return; window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang='ru-RU'; u.rate=0.9; u.onend=()=>currentSpeakingStepId=null; window.speechSynthesis.speak(u); }
     function stopSpeech() { if(window.speechSynthesis) window.speechSynthesis.cancel(); }
 
-    // Рендеры
+    // Рендеры главных экранов
     function renderHome() {
       return `<div class="min-h-screen w-full flex items-center justify-center"><div class="w-full px-4 lg:px-8 max-w-6xl mx-auto"><div class="grid lg:grid-cols-2 gap-12 items-center"><div class="text-center lg:text-left"><h1 class="text-5xl lg:text-7xl font-bold mb-6 py-2"><span class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] bg-clip-text text-transparent">Проверь свою киберсилу! </span><span>🔥</span></h1><p class="text-xl lg:text-2xl text-white/80 mb-8 leading-relaxed">Всего 30 минут — и ты научишься защищать телефон, компьютер и личные данные от мошенников. Играй и узнавай!</p><div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"><button class="px-8 py-4 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] text-[#0B1E33] rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-[#00FF94]/50 transition-all hover:scale-105" onclick="navigateTo('topicSelect')">Пройти обучение</button><button class="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-semibold text-lg border border-white/20 hover:bg-white/20 hover:border-[#00FF94]/50 transition-all hover:scale-105" onclick="navigateTo('checkSelect')">Проверить знания</button></div></div><div class="flex justify-center"><div class="relative">${getMascotSVG('pointing', 'w-64 h-64 lg:w-96 lg:h-96')}<div class="absolute -z-10 inset-0 bg-gradient-to-br from-[#00FF94]/30 to-[#2D7EE7]/30 blur-3xl animate-pulse"></div></div></div></div></div></div>`;
     }
@@ -466,7 +465,7 @@
       `;
     }
 
-    // ========== ИНТЕРНЕТ 3D (исправлено) ==========
+    // ========== ИНТЕРНЕТ 3D (ИСПРАВЛЕНО) ==========
     function renderInternet() {
       const steps = internetSteps;
       const positions = NODE_POSITIONS;
@@ -477,9 +476,9 @@
 
       const step = steps[learningStep];
 
-      // SVG линии в той же 3D-системе, без дополнительного смещения по Z
+      // SVG линии с центрированием и смещением 1000px
       const linesSvg = `
-        <svg class="internet-lines-svg">
+        <svg class="internet-lines-svg" style="left:50%; top:50%; transform:translate(-50%,-50%); width:2000px; height:2000px;">
           <defs>
             <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stop-color="#00FF94" stop-opacity="0.7"/>
@@ -491,7 +490,7 @@
             const from = positions[c.from];
             const to = positions[c.to];
             const isActive = (c.from === learningStep || c.to === learningStep);
-            return `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="url(#lineGrad)" stroke-width="${isActive ? 3 : 1.5}" opacity="${isActive ? 0.9 : 0.4}" filter="url(#glow)" class="connection-line" data-from="${c.from}" data-to="${c.to}" style="transition: all 0.5s;"/>`;
+            return `<line x1="${1000 + from.x}" y1="${1000 + from.y}" x2="${1000 + to.x}" y2="${1000 + to.y}" stroke="url(#lineGrad)" stroke-width="${isActive ? 3 : 1.5}" opacity="${isActive ? 0.9 : 0.4}" filter="url(#glow)" class="connection-line" data-from="${c.from}" data-to="${c.to}" style="transition: all 0.5s;"/>`;
           }).join('')}
         </svg>
       `;
