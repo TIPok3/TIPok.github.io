@@ -293,7 +293,7 @@
   <script>
     lucide.createIcons();
 
-    // Фоновая сеть (canvas) – без ускорения
+    // Фоновая сеть (canvas)
     const canvas = document.getElementById('networkCanvas');
     let ctx = canvas.getContext('2d');
     let width = window.innerWidth, height = window.innerHeight;
@@ -352,7 +352,7 @@
       } catch(e) { console.error('Ошибка загрузки данных:', e); }
     }
 
-    // Маскот с двумя глазами (как на главной)
+    // Обновлённый маскот (всегда с двумя глазами, как на главной)
     function getMascotSVG(variant = 'happy', className = 'w-20 h-20') {
       let mouthPath = '<path d="M45 62 Q60 72 75 62" stroke="#0B1E33" stroke-width="3" stroke-linecap="round" fill="none"/>';
       if (variant === 'thinking') mouthPath = '<path d="M45 65 Q60 68 75 65" stroke="#0B1E33" stroke-width="3" stroke-linecap="round" fill="none"/>';
@@ -466,7 +466,7 @@
       `;
     }
 
-    // ========== ИНТЕРНЕТ 3D (ФИНАЛЬНАЯ РАБОЧАЯ ВЕРСИЯ) ==========
+    // ========== ИНТЕРНЕТ 3D (ИСПРАВЛЕННАЯ ВЕРСИЯ) ==========
     function renderInternet() {
       const steps = internetSteps;
       const positions = NODE_POSITIONS;
@@ -566,7 +566,7 @@
             </div>
           </div>
 
-          <!-- Стрелки (работают как кнопка "Далее") -->
+          <!-- Стрелки (контейнер с pointer-events: none, стрелки с pointer-events: auto) -->
           <div class="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-4 z-50 arrow-container" style="max-width: 700px; margin: 0 auto;">
             <div class="nav-arrow ${learningStep === 0 ? 'disabled' : ''}" onclick="prevStep()" style="pointer-events: auto;"><i data-lucide="chevron-left" class="w-6 h-6"></i></div>
             <div class="nav-arrow ${learningStep === steps.length-1 ? 'disabled' : ''}" onclick="nextStep()" style="pointer-events: auto;"><i data-lucide="chevron-right" class="w-6 h-6"></i></div>
@@ -584,11 +584,75 @@
       if (step === learningStep) return;
       stopSpeech();
       learningStep = step;
-      // Полная перерисовка страницы, как в версии с кнопкой "Далее"
-      if (currentScreen === 'learning' && currentTopic === 'internet') {
+      const camera = document.getElementById('internetCamera');
+      if (camera) {
+        const pos = NODE_POSITIONS[step];
+        camera.style.transform = `translate3d(${-pos.x}px, ${-pos.y}px, ${-pos.z + 500}px)`;
+        document.querySelectorAll('.internet-node').forEach((node, idx) => node.classList.toggle('active', idx === step));
+        document.querySelectorAll('.connection-line').forEach(line => {
+          const from = parseInt(line.dataset.from);
+          const to = parseInt(line.dataset.to);
+          const active = (from === step || to === step);
+          line.style.opacity = active ? '0.9' : '0.4';
+          line.setAttribute('stroke-width', active ? '3' : '1.5');
+        });
+        updateInternetCardContent(step);
+        const stepSpan = document.querySelector('.internet-scene .text-white\\/60 span:last-child');
+        if (stepSpan) stepSpan.textContent = `Шаг ${step+1} из ${internetSteps.length}`;
+        const progressBar = document.querySelector('.internet-scene .bg-gradient-to-r');
+        if (progressBar) progressBar.style.width = `${((step+1)/internetSteps.length)*100}%`;
+        document.querySelectorAll('.internet-scene .flex.justify-center.gap-2 button').forEach((btn, idx) => {
+          btn.className = `h-2 rounded-full transition-all ${idx === step ? 'w-8 bg-gradient-to-r from-[#00FF94] to-[#2D7EE7]' : 'w-2 bg-white/30 hover:bg-white/50'}`;
+        });
+        const leftArrow = document.querySelector('.internet-scene .nav-arrow:first-child');
+        const rightArrow = document.querySelector('.internet-scene .nav-arrow:last-child');
+        if (leftArrow) leftArrow.classList.toggle('disabled', step === 0);
+        if (rightArrow) rightArrow.classList.toggle('disabled', step === internetSteps.length-1);
+      } else {
         renderScreen();
       }
     };
+
+    function updateInternetCardContent(stepIdx) {
+      const step = internetSteps[stepIdx];
+      const card = document.querySelector('.internet-card');
+      if (!card) return;
+      card.innerHTML = `
+        <div class="flex items-center gap-3 mb-3">
+          <div class="p-2 bg-gradient-to-br from-[#00FF94]/20 to-[#2D7EE7]/20 rounded-xl border border-[#00FF94]/30">
+            <i data-lucide="${step.icon}" class="w-6 h-6 text-[#00FF94]"></i>
+          </div>
+          <div class="flex-1">
+            <div class="text-2xl mb-0.5">🌐</div>
+            <h3 class="text-white font-bold text-xl">${step.title}</h3>
+          </div>
+        </div>
+        <div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 rounded-xl p-3 mb-3 border border-[#00FF94]/30">
+          <p class="text-white font-semibold text-center text-base">${step.content.split('•')[0].trim()}</p>
+        </div>
+        <div class="space-y-2 mb-3">
+          ${step.content.split('<br>').filter(p => p.includes('•')).slice(0,4).map(p => `
+            <div class="flex items-start gap-2 bg-white/5 rounded-lg p-2 border border-white/10">
+              <i data-lucide="shield" class="w-4 h-4 text-[#00FF94] mt-0.5"></i>
+              <span class="text-white/90 text-base">${p.replace('•','').trim()}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="bg-[#0B1E33] rounded-xl p-3 flex items-center gap-2 border border-[#00FF94]/30">
+          ${getMascotSVG('winking', 'w-8 h-8 flex-shrink-0')}
+          <p class="text-base text-[#00FF94]">💡 ${step.title.includes('VPN')?'Бесплатные VPN продают данные':step.title.includes('Коды')?'Никому не сообщайте код':'Всегда проверяйте ссылки'}</p>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    function updateInternetCamera() {
+      if (currentTopic !== 'internet') return;
+      const camera = document.getElementById('internetCamera');
+      if (!camera) return;
+      const pos = NODE_POSITIONS[learningStep];
+      camera.style.transform = `translate3d(${-pos.x}px, ${-pos.y}px, ${-pos.z + 500}px)`;
+    }
 
     function renderLearning() {
       stopSpeech();
@@ -609,7 +673,7 @@
       window.addEventListener('mouseup', (e) => { if (!mouseDown) return; const diff = e.clientX - mouseStartX; if (Math.abs(diff) > 50) diff > 0 ? prevStep() : nextStep(); mouseDown = false; card.style.cursor = 'grab'; });
     }
 
-    // Квиз и игра (без изменений)
+    // Квиз и игра
     function renderQuiz() {
       const q = quizState.questions[quizState.currentQuestion];
       const progress = ((quizState.currentQuestion + 1) / quizState.questions.length) * 100;
@@ -689,3 +753,4 @@
   </script>
 </body>
 </html>
+)
