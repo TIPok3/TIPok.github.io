@@ -263,10 +263,14 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.4);
       transition: transform 0.2s, box-shadow 0.2s;
       cursor: pointer;
+      pointer-events: auto;
       z-index: 100;
     }
     .nav-arrow:hover { transform: scale(1.1); box-shadow: 0 0 20px #00FF94; }
     .nav-arrow.disabled { opacity: 0.3; pointer-events: none; }
+    .arrow-container {
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -348,15 +352,15 @@
       } catch(e) { console.error('Ошибка загрузки данных:', e); }
     }
 
+    // Обновлённый маскот (всегда с двумя глазами, как на главной)
     function getMascotSVG(variant = 'happy', className = 'w-20 h-20') {
-      let mouthPath, pointingFinger = '';
+      let mouthPath = '<path d="M45 62 Q60 72 75 62" stroke="#0B1E33" stroke-width="3" stroke-linecap="round" fill="none"/>';
       if (variant === 'thinking') mouthPath = '<path d="M45 65 Q60 68 75 65" stroke="#0B1E33" stroke-width="3" stroke-linecap="round" fill="none"/>';
       else if (variant === 'happy') mouthPath = '<path d="M45 62 Q60 72 75 62" stroke="#0B1E33" stroke-width="3" stroke-linecap="round" fill="none"/>';
       else if (variant === 'winking') mouthPath = '<path d="M45 62 Q60 70 75 62" stroke="#0B1E33" stroke-width="3" stroke-linecap="round" fill="none"/>';
-      else mouthPath = '<path d="M45 62 Q60 72 75 62" stroke="#0B1E33" stroke-width="3" stroke-linecap="round" fill="none"/>';
-      let leftEye, rightEye;
-      if (variant === 'winking') { leftEye = '<circle cx="48" cy="48" r="1" fill="#0B1E33"/>'; rightEye = '<circle cx="72" cy="48" r="5" fill="#0B1E33"/>'; }
-      else { leftEye = '<circle cx="48" cy="48" r="5" fill="#0B1E33" class="mascot-eye-left"/>'; rightEye = '<circle cx="72" cy="48" r="5" fill="#0B1E33"/>'; }
+      const leftEye = '<circle cx="48" cy="48" r="5" fill="#0B1E33" class="mascot-eye-left"/>';
+      const rightEye = '<circle cx="72" cy="48" r="5" fill="#0B1E33"/>';
+      let pointingFinger = '';
       if (variant === 'pointing') pointingFinger = '<path class="pointing-finger" d="M85 45 L100 35 L105 38 L90 48 Z" fill="#00FF94" stroke="#0B1E33" stroke-width="2"/>';
       return '<svg width="120" height="120" viewBox="-5 -5 130 130" class="mascot-container mascot-glow ' + className + '"><path d="M60 10 L90 25 L90 55 Q90 85 60 110 Q30 85 30 55 L30 25 Z" fill="#00FF94" stroke="#0B1E33" stroke-width="3"/><path d="M60 20 L80 30 L80 52 Q80 75 60 95 Q40 75 40 52 L40 30 Z" fill="#0B1E33" opacity="0.3"/>' + leftEye + rightEye + mouthPath + '<g transform="translate(60,70)"><rect x="-8" y="-3" width="16" height="12" rx="2" fill="#2D7EE7" /><path d="M -5 -3 L -5 -8 Q -5 -12 0 -12 Q 5 -12 5 -8 L 5 -3" fill="none" stroke="#2D7EE7" stroke-width="3" stroke-linecap="round"/><circle cx="0" cy="2" r="2" fill="#0B1E33" /></g>' + pointingFinger + '<g class="mascot-antenna"><line x1="50" y1="10" x2="50" y2="2" stroke="#2D7EE7" stroke-width="2" /><circle cx="50" cy="2" r="3" fill="#2D7EE7" /><line x1="70" y1="10" x2="70" y2="2" stroke="#2D7EE7" stroke-width="2" /><circle cx="70" cy="2" r="3" fill="#2D7EE7" /></g></svg>';
     }
@@ -462,7 +466,7 @@
       `;
     }
 
-    // ========== ИНТЕРНЕТ 3D (ИСПРАВЛЕНО) ==========
+    // ========== ИНТЕРНЕТ 3D (ИСПРАВЛЕННАЯ ВЕРСИЯ) ==========
     function renderInternet() {
       const steps = internetSteps;
       const positions = NODE_POSITIONS;
@@ -472,7 +476,6 @@
       const cameraTransform = `translate3d(${-currentPos.x}px, ${-currentPos.y}px, ${-currentPos.z + 500}px)`;
 
       const step = steps[learningStep];
-      const isLast = learningStep === steps.length - 1;
 
       const linesSvg = `
         <svg class="internet-lines-svg" style="left:50%; top:50%; transform:translate(-50%,-50%); width:2000px; height:2000px;">
@@ -551,7 +554,7 @@
               <div class="space-y-2 mb-3">
                 ${step.content.split('<br>').filter(p => p.includes('•')).slice(0,4).map(p => `
                   <div class="flex items-start gap-2 bg-white/5 rounded-lg p-2 border border-white/10">
-                    <i data-lucide="shield" class="w-4 h-4 text-[#00FF94] mt-0.5 flex-shrink-0"></i>
+                    <i data-lucide="shield" class="w-4 h-4 text-[#00FF94] mt-0.5"></i>
                     <span class="text-white/90 text-base">${p.replace('•','').trim()}</span>
                   </div>
                 `).join('')}
@@ -563,10 +566,10 @@
             </div>
           </div>
 
-          <!-- Стрелки -->
-          <div class="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-4 z-50" style="max-width: 700px; margin: 0 auto; pointer-events: none;">
+          <!-- Стрелки (контейнер с pointer-events: none, стрелки с pointer-events: auto) -->
+          <div class="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-4 z-50 arrow-container" style="max-width: 700px; margin: 0 auto;">
             <div class="nav-arrow ${learningStep === 0 ? 'disabled' : ''}" onclick="prevStep()" style="pointer-events: auto;"><i data-lucide="chevron-left" class="w-6 h-6"></i></div>
-            <div class="nav-arrow ${isLast ? 'disabled' : ''}" onclick="nextStep()" style="pointer-events: auto;"><i data-lucide="chevron-right" class="w-6 h-6"></i></div>
+            <div class="nav-arrow ${learningStep === steps.length-1 ? 'disabled' : ''}" onclick="nextStep()" style="pointer-events: auto;"><i data-lucide="chevron-right" class="w-6 h-6"></i></div>
           </div>
 
           <!-- Индикатор точек -->
@@ -630,7 +633,7 @@
         <div class="space-y-2 mb-3">
           ${step.content.split('<br>').filter(p => p.includes('•')).slice(0,4).map(p => `
             <div class="flex items-start gap-2 bg-white/5 rounded-lg p-2 border border-white/10">
-              <i data-lucide="shield" class="w-4 h-4 text-[#00FF94] mt-0.5 flex-shrink-0"></i>
+              <i data-lucide="shield" class="w-4 h-4 text-[#00FF94] mt-0.5"></i>
               <span class="text-white/90 text-base">${p.replace('•','').trim()}</span>
             </div>
           `).join('')}
@@ -670,7 +673,7 @@
       window.addEventListener('mouseup', (e) => { if (!mouseDown) return; const diff = e.clientX - mouseStartX; if (Math.abs(diff) > 50) diff > 0 ? prevStep() : nextStep(); mouseDown = false; card.style.cursor = 'grab'; });
     }
 
-    // Квиз и игра (без изменений)
+    // Квиз и игра
     function renderQuiz() {
       const q = quizState.questions[quizState.currentQuestion];
       const progress = ((quizState.currentQuestion + 1) / quizState.questions.length) * 100;
