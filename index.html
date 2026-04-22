@@ -108,11 +108,11 @@
     .card-enter { animation: cardFadeIn 0.4s ease-out; }
     @keyframes cardFadeIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
 
-    /* Компьютер — новый стиль, без синей обводки */
+    /* Компьютер (новый стиль) */
     .computer-monitor {
       background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
       border-radius: 1.5rem 1.5rem 0.5rem 0.5rem;
-      padding: 1.2rem;
+      padding: 1rem;
       box-shadow: 0 0 0 1px #00FF94, 0 20px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
       width: 800px;
       margin: 0 auto;
@@ -121,8 +121,8 @@
       background: #0B1E33;
       border-radius: 1rem;
       overflow: hidden;
-      height: 540px;
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.5), inset 0 0 0 1px #1a3150;
+      height: 520px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
     }
     .computer-content {
       padding: 0;
@@ -385,13 +385,10 @@
       const steps = phoneSteps;
       const step = steps[learningStep];
       const isLast = learningStep === steps.length - 1;
-      let contentHtml = step.content;
-      
-      // Убираем таблицы, преобразуем в обычный текст с пунктами
-      const parts = contentHtml.split('<br>');
-      let mainText = parts[0] || '';
+      // Убираем таблицы, преобразуем в обычный текст
+      const parts = step.content.split('<br>');
+      const mainText = parts[0] || '';
       const points = parts.filter(p => p.includes('•')).map(p => p.replace('•', '').trim());
-      
       return `
         <div class="w-full px-4 lg:px-8 max-w-4xl mx-auto">
           <div class="text-center mb-2">
@@ -575,13 +572,29 @@
         const pos = NODE_POSITIONS[step];
         camera.style.transform = `translate3d(${-pos.x}px, ${-pos.y}px, ${-pos.z + 500}px)`;
         document.querySelectorAll('.internet-node').forEach((node, idx) => node.classList.toggle('active', idx === step));
-        document.querySelectorAll('.connection-line').forEach(line => {
-          const from = parseInt(line.dataset.from);
-          const to = parseInt(line.dataset.to);
-          const active = (from === step || to === step);
-          line.style.opacity = active ? '0.9' : '0.4';
-          line.setAttribute('stroke-width', active ? '3' : '1.5');
-        });
+        // Перерисовать SVG с линиями для актуальной подсветки
+        const svgContainer = document.querySelector('.internet-lines-svg');
+        if (svgContainer) {
+          const newSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          newSvg.setAttribute("class", "internet-lines-svg");
+          newSvg.setAttribute("style", "left:50%; top:50%; transform:translate(-50%,-50%); width:2000px; height:2000px;");
+          newSvg.innerHTML = `
+            <defs>
+              <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#00FF94" stop-opacity="0.7"/>
+                <stop offset="100%" stop-color="#2D7EE7" stop-opacity="0.9"/>
+              </linearGradient>
+              <filter id="glow"><feGaussianBlur stdDeviation="2"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            ${NODE_CONNECTIONS.map(c => {
+              const from = NODE_POSITIONS[c.from];
+              const to = NODE_POSITIONS[c.to];
+              const isActive = (c.from === step || c.to === step);
+              return `<line x1="${1000 + from.x}" y1="${1000 + from.y}" x2="${1000 + to.x}" y2="${1000 + to.y}" stroke="url(#lineGrad)" stroke-width="${isActive ? 3 : 1.5}" opacity="${isActive ? 0.9 : 0.4}" filter="url(#glow)" class="connection-line" data-from="${c.from}" data-to="${c.to}" style="transition: all 0.5s;"/>`;
+            }).join('')}
+          `;
+          svgContainer.parentNode.replaceChild(newSvg, svgContainer);
+        }
         updateInternetCardContent(step);
         const stepSpan = document.querySelector('.internet-scene .text-white\\/60 span:last-child');
         if (stepSpan) stepSpan.textContent = `Шаг ${step+1} из ${internetSteps.length}`;
