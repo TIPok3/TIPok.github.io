@@ -108,7 +108,7 @@
     .card-enter { animation: cardFadeIn 0.4s ease-out; }
     @keyframes cardFadeIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
 
-    /* Компьютер (новый стиль) */
+    /* Компьютер (исправлен) */
     .computer-monitor {
       background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
       border-radius: 1.5rem 1.5rem 0.5rem 0.5rem;
@@ -272,6 +272,13 @@
     .arrow-container {
       pointer-events: none;
     }
+
+    /* Единый размер для всех иконок щита */
+    .icon-shield {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
@@ -381,11 +388,12 @@
       return `<div class="min-h-screen w-full flex items-start justify-center pt-16"><div class="w-full px-4 lg:px-8 max-w-6xl mx-auto"><h2 class="text-4xl lg:text-5xl font-bold text-white text-center mb-10">Что будем проверять?</h2><div class="flex flex-col md:flex-row items-center justify-center gap-8"><div class="topic-card"><div class="w-40 h-40 topic-figure relative"><svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl relative z-10"><defs><linearGradient id="gradBulb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs><ellipse cx="60" cy="55" rx="25" ry="32" fill="url(#gradBulb)" stroke="#0B1E33" stroke-width="3"/><rect x="52" y="82" width="16" height="15" rx="4" fill="#2D7EE7" stroke="#0B1E33" stroke-width="2"/><line x1="60" y1="82" x2="60" y2="72" stroke="#0B1E33" stroke-width="2"/><path class="bulb-filament" d="M50 45 Q60 35 70 45" stroke="#666" stroke-width="3" fill="none"/></svg><div class="bulb-glow absolute inset-0 w-full h-full pointer-events-none opacity-0 transition-all duration-300" style="background: radial-gradient(circle at center, rgba(255,215,0,0.6) 0%, rgba(255,215,0,0) 70%); filter: blur(12px);"></div></div><button class="topic-button" onclick="navigateTo('quiz')">Квиз</button></div><div class="topic-card"><div class="w-40 h-40 topic-figure"><svg viewBox="0 0 120 120" class="w-full h-full drop-shadow-xl"><defs><linearGradient id="gradMask" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00FF94"/><stop offset="100%" stop-color="#2D7EE7"/></linearGradient></defs><path d="M30 30 Q60 15 90 30 L90 75 Q60 95 30 75 Z" fill="#1a2a3a" stroke="#0B1E33" stroke-width="3"/><ellipse cx="45" cy="55" rx="10" ry="7" fill="white" stroke="#0B1E33" stroke-width="2"/><ellipse cx="75" cy="55" rx="10" ry="7" fill="white" stroke="#0B1E33" stroke-width="2"/><circle cx="42" cy="53" r="4" fill="#0B1E33"/><circle cx="78" cy="53" r="4" fill="#0B1E33"/><circle cx="25" cy="90" r="18" fill="none" stroke="#0B1E33" stroke-width="4"/><line x1="15" y1="80" x2="35" y2="100" stroke="#0B1E33" stroke-width="2"/><line x1="35" y1="80" x2="15" y2="100" stroke="#0B1E33" stroke-width="2"/><path d="M38 102 Q45 110 55 108" stroke="#0B1E33" stroke-width="5" fill="none" stroke-linecap="round"/></svg></div><button class="topic-button" onclick="navigateTo('game')">Найди мошенника</button></div></div></div></div>`;
     }
 
+    // ========== ТЕЛЕФОН (без таблиц) ==========
     function renderPhone() {
       const steps = phoneSteps;
       const step = steps[learningStep];
       const isLast = learningStep === steps.length - 1;
-      // Убираем таблицы, преобразуем в обычный текст
+      // Извлекаем главную мысль и пункты
       const parts = step.content.split('<br>');
       const mainText = parts[0] || '';
       const points = parts.filter(p => p.includes('•')).map(p => p.replace('•', '').trim());
@@ -408,7 +416,7 @@
                       </div>
                       <div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 border border-[#00FF94]/30 rounded-xl p-3 mb-3"><p class="text-white font-semibold text-sm text-center">${mainText}</p></div>
                       <div class="space-y-1 mb-3 flex-1">
-                        ${points.map(p => `<div class="flex items-start gap-2 bg-white/5 rounded-lg p-2 border border-white/10"><i data-lucide="shield" class="w-5 h-5 text-[#00FF94] mt-0.5"></i><span class="text-white/90 text-sm">${p}</span></div>`).join('')}
+                        ${points.map(p => `<div class="flex items-start gap-2 bg-white/5 rounded-lg p-2 border border-white/10"><i data-lucide="shield" class="icon-shield text-[#00FF94] mt-0.5"></i><span class="text-white/90 text-xs">${p}</span></div>`).join('')}
                       </div>
                       <div class="bg-[#1a3150] border border-[#2D7EE7]/30 rounded-xl p-2 flex items-start gap-2"><div class="w-8 h-8">${getMascotSVG('happy', 'w-8 h-8')}</div><p class="text-[#00FF94] text-xs">💡 Совет: ${step.title.includes('PIN')?'Всегда меняйте PIN по умолчанию':step.title.includes('Блокировка')?'Используйте биометрию + пароль':step.title.includes('Разрешения')?'Проверяйте права приложений':step.title.includes('Вирусы')?'Регулярно обновляйте систему':'Будьте внимательны в сети'}</p></div>
                     </div>
@@ -426,6 +434,7 @@
       `;
     }
 
+    // ========== КОМПЬЮТЕР (обновлён) ==========
     function renderComputer() {
       const steps = computerSteps;
       const step = steps[learningStep];
@@ -433,13 +442,13 @@
       const mainText = step.content.split('•')[0];
       const points = step.content.split('<br>').filter(p => p.includes('•')).slice(0,4).map(p => p.replace('•','').trim());
       return `
-        <div class="w-full px-4 lg:px-8 max-w-5xl mx-auto">
+        <div class="w-full px-4 lg:px-8 max-w-5xl mx-auto" style="margin-top: 20px;">
           <div class="text-center mb-2">
             <div class="flex justify-between items-center text-white/60 text-sm mb-1"><span>Шаг ${learningStep+1} из ${steps.length}</span><button class="hover:text-[#00FF94]" onclick="goBack()">← Назад</button></div>
             <div class="w-full bg-[#1a3150] rounded-full h-2"><div class="bg-gradient-to-r from-[#00FF94] to-[#2D7EE7] h-2 rounded-full" style="width: ${((learningStep+1)/steps.length)*100}%;"></div></div>
           </div>
           <div class="flex justify-center">
-            <div><div class="computer-monitor"><div class="computer-screen"><div class="computer-content"><div class="computer-window"><div class="window-bar"><div class="window-dots"><div class="dot-red"></div><div class="dot-yellow"></div><div class="dot-green"></div></div><div class="window-title">${step.title}</div><div class="text-xl ml-auto">🖥️</div></div><div class="window-content"><div class="flex justify-center mb-4"><i data-lucide="${step.icon}" class="w-10 h-10 text-[#00FF94]"></i></div><div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 rounded-lg p-3 mb-4"><p class="text-white font-bold text-lg text-center">${mainText}</p></div><div class="grid grid-cols-2 gap-3">${points.map(p => `<div class="bg-white/5 rounded-lg p-3 flex items-start gap-2"><i data-lucide="shield" class="w-5 h-5 text-[#00FF94] mt-0.5"></i><span class="text-white/90 text-base">${p}</span></div>`).join('')}</div><div class="mt-4 bg-[#0B1E33] rounded-lg p-3 flex items-center gap-3"><div class="w-8 h-8">${getMascotSVG('thinking', 'w-8 h-8')}</div><p class="text-[#00FF94] text-base">💡 ${step.title.includes('Windows')?'Скачивайте Windows только с microsoft.com':step.title.includes('Пароль')?'Используйте менеджер паролей':'Обновляйте антивирус'}</p></div></div></div></div></div></div><div class="computer-stand"></div><div class="computer-base"></div></div>
+            <div><div class="computer-monitor"><div class="computer-screen"><div class="computer-content"><div class="computer-window"><div class="window-bar"><div class="window-dots"><div class="dot-red"></div><div class="dot-yellow"></div><div class="dot-green"></div></div><div class="window-title">${step.title}</div><div class="text-xl ml-auto">🖥️</div></div><div class="window-content"><div class="flex justify-center mb-4"><i data-lucide="${step.icon}" class="w-10 h-10 text-[#00FF94]"></i></div><div class="bg-gradient-to-br from-[#00FF94]/10 to-[#2D7EE7]/10 rounded-lg p-3 mb-4"><p class="text-white font-bold text-lg text-center">${mainText}</p></div><div class="grid grid-cols-2 gap-3">${points.map(p => `<div class="bg-white/5 rounded-lg p-3 flex items-start gap-2"><i data-lucide="shield" class="icon-shield text-[#00FF94] mt-0.5"></i><span class="text-white/90 text-base">${p}</span></div>`).join('')}</div><div class="mt-4 bg-[#0B1E33] rounded-lg p-3 flex items-center gap-3"><div class="w-8 h-8">${getMascotSVG('thinking', 'w-8 h-8')}</div><p class="text-[#00FF94] text-base">💡 ${step.title.includes('Windows')?'Скачивайте Windows только с microsoft.com':step.title.includes('Пароль')?'Используйте менеджер паролей':'Обновляйте антивирус'}</p></div></div></div></div></div></div><div class="computer-stand"></div><div class="computer-base"></div></div>
           </div>
           <div class="flex justify-center gap-4 mt-6">
             ${learningStep>0 ? '<button class="px-6 py-3 bg-white/10 border border-white/20 rounded-xl text-base font-semibold text-white hover:bg-[#2D7EE7] transition-all" onclick="prevStep()"><i data-lucide="arrow-left" class="inline mr-2"></i>Назад</button>' : ''}
@@ -449,7 +458,7 @@
       `;
     }
 
-    // ========== ИНТЕРНЕТ 3D (ФИНАЛЬНАЯ ВЕРСИЯ) ==========
+    // ========== ИНТЕРНЕТ 3D (исправлен счётчик) ==========
     function renderInternet() {
       const steps = internetSteps;
       const positions = NODE_POSITIONS;
@@ -484,7 +493,7 @@
           <div class="absolute top-2 left-1/2 -translate-x-1/2 w-auto max-w-md px-6 z-40 pointer-events-none" style="width: 90%; max-width: 500px;">
             <div class="flex justify-between items-center text-white/60 text-sm mb-1">
               <button class="hover:text-[#00FF94] transition-colors flex items-center gap-1 pointer-events-auto" onclick="goBack()"><i data-lucide="arrow-left" class="w-4 h-4"></i> Назад</button>
-              <span class="text-base">Шаг ${learningStep+1} из ${steps.length}</span>
+              <span class="text-base" id="internetStepCounter">Шаг ${learningStep+1} из ${steps.length}</span>
               <div class="w-10"></div>
             </div>
             <div class="w-full bg-[#1a3150] rounded-full h-1.5">
@@ -537,7 +546,7 @@
               <div class="space-y-2 mb-3">
                 ${step.content.split('<br>').filter(p => p.includes('•')).slice(0,4).map(p => `
                   <div class="flex items-start gap-2 bg-white/5 rounded-lg p-2 border border-white/10">
-                    <i data-lucide="shield" class="w-5 h-5 text-[#00FF94] mt-0.5"></i>
+                    <i data-lucide="shield" class="icon-shield text-[#00FF94] mt-0.5"></i>
                     <span class="text-white/90 text-base">${p.replace('•','').trim()}</span>
                   </div>
                 `).join('')}
@@ -549,7 +558,7 @@
             </div>
           </div>
 
-          <!-- Стрелки (прямой вызов setInternetStep) -->
+          <!-- Стрелки -->
           <div class="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-4 z-50 arrow-container" style="max-width: 700px; margin: 0 auto;">
             <div class="nav-arrow ${learningStep === 0 ? 'disabled' : ''}" onclick="${learningStep > 0 ? `setInternetStep(${learningStep - 1})` : ''}" style="pointer-events: auto;"><i data-lucide="chevron-left" class="w-6 h-6"></i></div>
             <div class="nav-arrow ${learningStep === steps.length-1 ? 'disabled' : ''}" onclick="${learningStep < steps.length-1 ? `setInternetStep(${learningStep + 1})` : ''}" style="pointer-events: auto;"><i data-lucide="chevron-right" class="w-6 h-6"></i></div>
@@ -572,32 +581,18 @@
         const pos = NODE_POSITIONS[step];
         camera.style.transform = `translate3d(${-pos.x}px, ${-pos.y}px, ${-pos.z + 500}px)`;
         document.querySelectorAll('.internet-node').forEach((node, idx) => node.classList.toggle('active', idx === step));
-        // Перерисовать SVG с линиями для актуальной подсветки
-        const svgContainer = document.querySelector('.internet-lines-svg');
-        if (svgContainer) {
-          const newSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-          newSvg.setAttribute("class", "internet-lines-svg");
-          newSvg.setAttribute("style", "left:50%; top:50%; transform:translate(-50%,-50%); width:2000px; height:2000px;");
-          newSvg.innerHTML = `
-            <defs>
-              <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#00FF94" stop-opacity="0.7"/>
-                <stop offset="100%" stop-color="#2D7EE7" stop-opacity="0.9"/>
-              </linearGradient>
-              <filter id="glow"><feGaussianBlur stdDeviation="2"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-            </defs>
-            ${NODE_CONNECTIONS.map(c => {
-              const from = NODE_POSITIONS[c.from];
-              const to = NODE_POSITIONS[c.to];
-              const isActive = (c.from === step || c.to === step);
-              return `<line x1="${1000 + from.x}" y1="${1000 + from.y}" x2="${1000 + to.x}" y2="${1000 + to.y}" stroke="url(#lineGrad)" stroke-width="${isActive ? 3 : 1.5}" opacity="${isActive ? 0.9 : 0.4}" filter="url(#glow)" class="connection-line" data-from="${c.from}" data-to="${c.to}" style="transition: all 0.5s;"/>`;
-            }).join('')}
-          `;
-          svgContainer.parentNode.replaceChild(newSvg, svgContainer);
-        }
+        // Обновить линии (подсветка)
+        document.querySelectorAll('.connection-line').forEach(line => {
+          const from = parseInt(line.dataset.from);
+          const to = parseInt(line.dataset.to);
+          const active = (from === step || to === step);
+          line.style.opacity = active ? '0.9' : '0.4';
+          line.setAttribute('stroke-width', active ? '3' : '1.5');
+        });
         updateInternetCardContent(step);
-        const stepSpan = document.querySelector('.internet-scene .text-white\\/60 span:last-child');
-        if (stepSpan) stepSpan.textContent = `Шаг ${step+1} из ${internetSteps.length}`;
+        // Обновить счётчик шага
+        const counter = document.getElementById('internetStepCounter');
+        if (counter) counter.textContent = `Шаг ${step+1} из ${internetSteps.length}`;
         const progressBar = document.querySelector('.internet-scene .bg-gradient-to-r');
         if (progressBar) progressBar.style.width = `${((step+1)/internetSteps.length)*100}%`;
         document.querySelectorAll('.internet-scene .flex.justify-center.gap-2 button').forEach((btn, idx) => {
@@ -638,7 +633,7 @@
         <div class="space-y-2 mb-3">
           ${step.content.split('<br>').filter(p => p.includes('•')).slice(0,4).map(p => `
             <div class="flex items-start gap-2 bg-white/5 rounded-lg p-2 border border-white/10">
-              <i data-lucide="shield" class="w-5 h-5 text-[#00FF94] mt-0.5"></i>
+              <i data-lucide="shield" class="icon-shield text-[#00FF94] mt-0.5"></i>
               <span class="text-white/90 text-base">${p.replace('•','').trim()}</span>
             </div>
           `).join('')}
@@ -678,7 +673,7 @@
       window.addEventListener('mouseup', (e) => { if (!mouseDown) return; const diff = e.clientX - mouseStartX; if (Math.abs(diff) > 50) diff > 0 ? prevStep() : nextStep(); mouseDown = false; card.style.cursor = 'grab'; });
     }
 
-    // Квиз и игра
+    // Квиз и игра (без изменений)
     function renderQuiz() {
       const q = quizState.questions[quizState.currentQuestion];
       const progress = ((quizState.currentQuestion + 1) / quizState.questions.length) * 100;
